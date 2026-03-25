@@ -45,7 +45,10 @@ export type ExtensionMessageType =
   | "linkedin_get_people"
   | "linkedin_connect"
   | "linkedin_next_page"
-  | "linkedin_go_to_page";
+  | "linkedin_go_to_page"
+  // LinkedIn Profile
+  | "linkedin_get_profile"
+  | "linkedin_profile_connect";
 
 // Payloads for each message type
 export interface GetFeedPostsPayload {
@@ -157,4 +160,38 @@ export interface GenerateResult {
     personaUsed: string;
     characterCount: number;
   };
+}
+
+/** LinkedIn profile information extracted from a profile page */
+export interface LinkedInProfile {
+  name: string;
+  headline: string;
+  location?: string;
+  profileUrl: string;
+  connectionDegree?: string;
+  followers?: string;
+  connections?: string;
+  about?: string;
+  isPremium?: boolean;
+  isVerified?: boolean;
+  profileImageUrl?: string;
+  currentRole?: {
+    title: string;
+    company: string;
+    duration?: string;
+    location?: string;
+  };
+  experiences?: Array<{
+    title: string;
+    company: string;
+    duration?: string;
+    location?: string;
+    description?: string;
+  }>;
+  education?: Array<{
+    school: string;
+    degree?: string;
+    years?: string;
+  }>;
+  skills?: string[];
 }

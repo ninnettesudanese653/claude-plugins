@@ -488,6 +488,47 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
                     required: ["page"],
                 },
             },
+            // LinkedIn Profile tools
+            {
+                name: "socials_linkedin_open_profile",
+                description: "Open a LinkedIn profile page in the agent tab. Use socials_linkedin_get_profile after this to extract profile info.",
+                inputSchema: {
+                    type: "object",
+                    properties: {
+                        profile_url: {
+                            type: "string",
+                            description: "LinkedIn profile URL (e.g., 'https://www.linkedin.com/in/username/' or '/in/username/')",
+                        },
+                    },
+                    required: ["profile_url"],
+                },
+            },
+            {
+                name: "socials_linkedin_get_profile",
+                description: "Extract profile information from the current LinkedIn profile page. " +
+                    "Returns name, headline, location, about, current role, experiences, education, skills, etc. " +
+                    "Must be on a LinkedIn profile page (/in/username/).",
+                inputSchema: {
+                    type: "object",
+                    properties: {},
+                    required: [],
+                },
+            },
+            {
+                name: "socials_linkedin_profile_connect",
+                description: "Send a connection request from the current LinkedIn profile page. " +
+                    "Must be on a profile page. IMPORTANT: Always confirm with the user before sending connection requests.",
+                inputSchema: {
+                    type: "object",
+                    properties: {
+                        note: {
+                            type: "string",
+                            description: "Optional personalized note to include with the connection request (max 300 chars)",
+                        },
+                    },
+                    required: [],
+                },
+            },
         ],
     };
 });
@@ -969,6 +1010,72 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                                 error: result.error,
                                 message: result.success
                                     ? `Navigated to page ${result.currentPage}`
+                                    : result.error,
+                            }),
+                        },
+                    ],
+                };
+            }
+            // LinkedIn Profile tools
+            case "socials_linkedin_open_profile": {
+                await requireProAccess();
+                let profileUrl = args.profile_url;
+                // Normalize the URL
+                if (!profileUrl.startsWith("http")) {
+                    if (profileUrl.startsWith("/in/")) {
+                        profileUrl = `https://www.linkedin.com${profileUrl}`;
+                    }
+                    else if (profileUrl.startsWith("in/")) {
+                        profileUrl = `https://www.linkedin.com/${profileUrl}`;
+                    }
+                    else {
+                        profileUrl = `https://www.linkedin.com/in/${profileUrl}`;
+                    }
+                }
+                const result = await bridge.navigateTo(profileUrl);
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text: JSON.stringify({
+                                success: true,
+                                url: result.url,
+                                tabId: result.tabId,
+                                message: `Navigated to LinkedIn profile. Use socials_linkedin_get_profile to extract info.`,
+                            }),
+                        },
+                    ],
+                };
+            }
+            case "socials_linkedin_get_profile": {
+                await requireProAccess();
+                const result = await bridge.linkedinGetProfile();
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text: JSON.stringify({
+                                success: result.success,
+                                profile: result.profile,
+                                error: result.error,
+                            }),
+                        },
+                    ],
+                };
+            }
+            case "socials_linkedin_profile_connect": {
+                await requireProAccess();
+                const note = args?.note;
+                const result = await bridge.linkedinProfileConnect(note);
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text: JSON.stringify({
+                                success: result.success,
+                                error: result.error,
+                                message: result.success
+                                    ? "Connection request sent successfully"
                                     : result.error,
                             }),
                         },

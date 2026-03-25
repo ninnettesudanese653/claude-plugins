@@ -134,6 +134,46 @@ export declare class ExtensionBridge {
         currentPage?: number;
         error?: string;
     }>;
+    linkedinGetProfile(): Promise<{
+        success: boolean;
+        profile?: {
+            name: string;
+            headline: string;
+            location?: string;
+            profileUrl: string;
+            connectionDegree?: string;
+            followers?: string;
+            connections?: string;
+            about?: string;
+            isPremium?: boolean;
+            isVerified?: boolean;
+            profileImageUrl?: string;
+            currentRole?: {
+                title: string;
+                company: string;
+                duration?: string;
+                location?: string;
+            };
+            experiences?: Array<{
+                title: string;
+                company: string;
+                duration?: string;
+                location?: string;
+                description?: string;
+            }>;
+            education?: Array<{
+                school: string;
+                degree?: string;
+                years?: string;
+            }>;
+            skills?: string[];
+        };
+        error?: string;
+    }>;
+    linkedinProfileConnect(note?: string): Promise<{
+        success: boolean;
+        error?: string;
+    }>;
     stop(): void;
 }
 //# sourceMappingURL=extension-bridge.d.ts.map

@@ -251,6 +251,13 @@ export class ExtensionBridge {
     async linkedinGoToPage(page) {
         return this.sendRequest("linkedin_go_to_page", { page });
     }
+    // LinkedIn Profile methods
+    async linkedinGetProfile() {
+        return this.sendRequest("linkedin_get_profile", {});
+    }
+    async linkedinProfileConnect(note) {
+        return this.sendRequest("linkedin_profile_connect", { note });
+    }
     stop() {
         this.wsServerListening = false;
         if (this.pingInterval) {
