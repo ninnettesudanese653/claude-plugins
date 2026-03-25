@@ -23,10 +23,10 @@
   "homepage": "https://socials.brainrotcreations.com",
   "repository": {
     "type": "git",
-    "url": "https://github.com/BrainrotCreations/socials-claude-code-plugin.git"
+    "url": "https://github.com/Brainrot-Creations/claude-plugins.git"
   },
   "bugs": {
-    "url": "https://github.com/BrainrotCreations/socials-claude-code-plugin/issues"
+    "url": "https://github.com/Brainrot-Creations/claude-plugins/issues"
   },
   "license": "MIT",
   "files": [
