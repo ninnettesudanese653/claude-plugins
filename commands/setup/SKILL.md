@@ -35,7 +35,7 @@ Let's make sure you have everything ready."
 
 ## Step 3: Check Browser Extension
 
-Ask: "First - do you have the **Socials browser extension** installed in Chrome?"
+Ask: "Do you have the **Socials browser extension** installed in Chrome?"
 
 **If no or unsure:**
 "No problem! Here's how to get it:
@@ -49,35 +49,22 @@ Let me know once it's installed!"
 
 **If yes:** Continue
 
-## Step 4: Check Plan
-
-Ask: "Are you signed into Socials with a **paid plan** (Pro or higher)?"
-
-**If no or unsure:**
-"The Claude Code integration requires a paid Socials plan - the free tier doesn't include the MCP bridge.
-
-You can check plans and upgrade at:
-https://socials.brainrotcreations.com/pricing
-
-Let me know once you're signed in with a paid account!"
-
-**If yes:** Continue
-
-## Step 5: Activate the Connection
+## Step 4: Activate the Connection
 
 Guide them:
-"Perfect! Now let's activate the connection:
+"Great! Now let's activate the connection:
 
 1. **Open your browser** (Chrome) with the Socials extension
 2. **Click the Socials icon** in your toolbar (puzzle piece area)
 3. **Open the side panel** - this starts the connection
-4. Look for a **'Connected'** status in the extension
+4. **Sign in** to your Socials account if prompted
+5. Look for a **'Connected'** status in the extension
 
 Keep that browser window open - it's the bridge between Claude and your social accounts.
 
 Ready? Let me check if we're connected..."
 
-## Step 6: Verify Connection
+## Step 5: Verify Connection
 
 Try `socials_check_access` again.
 
