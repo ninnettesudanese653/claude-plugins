@@ -264,6 +264,45 @@ export class ExtensionBridge {
     async linkedinPostsSearch(query) {
         return this.sendRequest("linkedin_posts_search", { query });
     }
+    // ============ V2 Intent-Oriented Methods ============
+    // These handle navigation internally and return rich status
+    /**
+     * Unified connect - navigates to profile and sends connection request.
+     * Returns rich status on any outcome.
+     */
+    async linkedinConnectV2(profileUrl, note) {
+        return this.sendRequest("linkedin_connect_v2", {
+            profile_url: profileUrl,
+            note,
+        });
+    }
+    /**
+     * Unified profile - navigates to profile and extracts data in one call.
+     */
+    async linkedinProfileV2(profileUrl) {
+        return this.sendRequest("linkedin_profile_v2", { profile_url: profileUrl });
+    }
+    /**
+     * Get connection status without taking action.
+     */
+    async linkedinConnectionStatus(profileUrl) {
+        return this.sendRequest("linkedin_connection_status", { profile_url: profileUrl });
+    }
+    /**
+     * Unified engage - accepts post URL, navigates if needed, performs actions.
+     */
+    async linkedinEngageV2(postUrl, actions) {
+        return this.sendRequest("linkedin_engage_v2", {
+            post_url: postUrl,
+            actions,
+        });
+    }
+    /**
+     * Create a new LinkedIn post.
+     */
+    async linkedinCreatePost(content) {
+        return this.sendRequest("linkedin_create_post", { content });
+    }
     stop() {
         this.wsServerListening = false;
         if (this.pingInterval) {

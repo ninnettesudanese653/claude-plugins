@@ -81,22 +81,6 @@ const XSearchSchema = z.object({
     ),
 });
 
-const LinkedInEngagePostSchema = z.object({
-  platform: z
-    .literal("linkedin")
-    .describe("Must be linkedin"),
-  post_id: z
-    .string()
-    .min(1)
-    .describe("Post id/urn from socials_get_feed (LinkedIn activity URN or post identifier)"),
-  actions: z
-    .array(z.enum(["like", "repost", "quote_repost"]))
-    .min(1)
-    .describe(
-      "One or more actions to run in order on that post. like toggles the reaction. repost performs instant repost. quote_repost opens the quote dialog (repost with your thoughts).",
-    ),
-});
-
 const LinkedInPostsSearchSchema = z.object({
   query: z
     .string()
@@ -532,26 +516,6 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
         },
       },
       {
-        name: "socials_linkedin_connect",
-        description:
-          "Send a connection request to a person on LinkedIn. Must be on a people search results page. " +
-          "IMPORTANT: Always confirm with the user before sending connection requests.",
-        inputSchema: {
-          type: "object",
-          properties: {
-            profile_url: {
-              type: "string",
-              description: "LinkedIn profile URL of the person to connect with (e.g., '/in/username/' or full URL)",
-            },
-            note: {
-              type: "string",
-              description: "Optional personalized note to include with the connection request (max 300 chars)",
-            },
-          },
-          required: ["profile_url"],
-        },
-      },
-      {
         name: "socials_linkedin_next_page",
         description:
           "Go to the next page of LinkedIn search results. Returns false if already on the last page.",
@@ -576,88 +540,12 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ["page"],
         },
       },
-      // LinkedIn Profile tools
-      {
-        name: "socials_linkedin_open_profile",
-        description:
-          "Open a LinkedIn profile page in the agent tab. Use socials_linkedin_get_profile after this to extract profile info.",
-        inputSchema: {
-          type: "object",
-          properties: {
-            profile_url: {
-              type: "string",
-              description: "LinkedIn profile URL (e.g., 'https://www.linkedin.com/in/username/' or '/in/username/')",
-            },
-          },
-          required: ["profile_url"],
-        },
-      },
-      {
-        name: "socials_linkedin_get_profile",
-        description:
-          "Extract profile information from the current LinkedIn profile page. " +
-          "Returns name, headline, location, about, current role, experiences, education, skills, etc. " +
-          "Must be on a LinkedIn profile page (/in/username/).",
-        inputSchema: {
-          type: "object",
-          properties: {},
-          required: [],
-        },
-      },
-      {
-        name: "socials_linkedin_profile_connect",
-        description:
-          "Send a connection request from the current LinkedIn profile page. " +
-          "Must be on a profile page. IMPORTANT: Always confirm with the user before sending connection requests.",
-        inputSchema: {
-          type: "object",
-          properties: {
-            note: {
-              type: "string",
-              description: "Optional personalized note to include with the connection request (max 300 chars)",
-            },
-          },
-          required: [],
-        },
-      },
-      // LinkedIn Engagement tools
-      {
-        name: "socials_linkedin_engage_post",
-        description:
-          "On LinkedIn, perform engagement on a post visible in the pinned agent tab (feed, search results, etc.; tab need not be focused). " +
-          "Uses the post id from socials_get_feed. Runs actions in order: like (toggles reaction), repost (instant repost), quote_repost (opens quote dialog). " +
-          "Like is a toggle—calling again may undo the reaction. quote_repost returns the sharebox URL. " +
-          "IMPORTANT: Only use when the user explicitly wants these actions.",
-        inputSchema: {
-          type: "object",
-          properties: {
-            platform: {
-              type: "string",
-              enum: ["linkedin"],
-              description: "Must be linkedin",
-            },
-            post_id: {
-              type: "string",
-              description: "LinkedIn post id/urn from socials_get_feed",
-            },
-            actions: {
-              type: "array",
-              items: {
-                type: "string",
-                enum: ["like", "repost", "quote_repost"],
-              },
-              description: "Actions to perform, in order (like, repost, quote_repost)",
-            },
-          },
-          required: ["platform", "post_id", "actions"],
-        },
-      },
       // LinkedIn Posts Search
       {
         name: "socials_linkedin_posts_search",
         description:
-          "On LinkedIn, search for posts/content in the pinned agent tab: navigates to search results filtered to Posts (e.g. /search/results/content/?keywords=...). " +
-          "After success, use socials_get_feed to read the visible posts, then socials_linkedin_engage_post or socials_quick_reply to interact.",
+          "Search for posts on LinkedIn. Navigates to search results filtered to Posts. " +
+          "After success, use socials_get_feed to read visible posts, then socials_linkedin_engage or socials_quick_reply to interact.",
         inputSchema: {
           type: "object",
           properties: {
@@ -669,6 +557,103 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ["query"],
         },
       },
+      // LinkedIn Profile & Connection Tools (handle navigation internally)
+      {
+        name: "socials_linkedin_connect",
+        description:
+          "Send a connection request on LinkedIn. Automatically navigates to the profile if needed. " +
+          "Returns rich status: already_connected, pending_sent, pending_received, follow_only, or success. " +
+          "IMPORTANT: Always confirm with the user before sending connection requests.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            profile_url: {
+              type: "string",
+              description: "LinkedIn profile URL (full URL or /in/username)",
+            },
+            note: {
+              type: "string",
+              description: "Optional personalized note (max 300 chars)",
+            },
+          },
+          required: ["profile_url"],
+        },
+      },
+      {
+        name: "socials_linkedin_profile",
+        description:
+          "Get LinkedIn profile information. Navigates to the profile and extracts data in one call. " +
+          "Returns name, headline, about, experience, education, skills, connection status, and more.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            profile_url: {
+              type: "string",
+              description: "LinkedIn profile URL (full URL or /in/username)",
+            },
+          },
+          required: ["profile_url"],
+        },
+      },
+      {
+        name: "socials_linkedin_connection_status",
+        description:
+          "Check the connection status with a LinkedIn user without sending a request. " +
+          "Returns: connected, pending_sent, pending_received, not_connected, or follow_only.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            profile_url: {
+              type: "string",
+              description: "LinkedIn profile URL (full URL or /in/username)",
+            },
+          },
+          required: ["profile_url"],
+        },
+      },
+      {
+        name: "socials_linkedin_engage",
+        description:
+          "Engage with a LinkedIn post visible on the current feed or search results page. " +
+          "Use socials_get_feed first to get post IDs, then pass the post_id here. " +
+          "Actions: like (toggle), repost (instant), quote_repost (opens dialog). " +
+          "IMPORTANT: Only use when the user explicitly wants these actions.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            post_id: {
+              type: "string",
+              description: "LinkedIn post ID/URN from socials_get_feed",
+            },
+            actions: {
+              type: "array",
+              items: {
+                type: "string",
+                enum: ["like", "repost", "quote_repost"],
+              },
+              description: "Actions to perform",
+            },
+          },
+          required: ["post_id", "actions"],
+        },
+      },
+      // TODO: Re-enable when LinkedIn UI selectors are updated
+      // {
+      //   name: "socials_linkedin_create_post",
+      //   description:
+      //     "Create a new post on LinkedIn. Opens the compose dialog, types the content, and posts. " +
+      //     "IMPORTANT: Always confirm the exact text with the user before calling this tool.",
+      //   inputSchema: {
+      //     type: "object",
+      //     properties: {
+      //       content: {
+      //         type: "string",
+      //         description: "Post content (LinkedIn character limits apply)",
+      //       },
+      //     },
+      //     required: ["content"],
+      //   },
+      // },
     ],
   };
 });
@@ -1164,28 +1149,6 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         };
       }
 
-      case "socials_linkedin_connect": {
-        await requireProAccess();
-        const profileUrl = (args as { profile_url: string }).profile_url;
-        const note = (args as { note?: string })?.note;
-        const result = await bridge.linkedinConnect(profileUrl, note);
-
-        return {
-          content: [
-            {
-              type: "text",
-              text: JSON.stringify({
-                success: result.success,
-                error: result.error,
-                message: result.success
-                  ? "Connection request sent successfully"
-                  : result.error,
-              }),
-            },
-          ],
-        };
-      }
-
       case "socials_linkedin_next_page": {
         await requireProAccess();
         const result = await bridge.linkedinNextPage();
@@ -1229,101 +1192,6 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         };
       }
 
-      // LinkedIn Profile tools
-      case "socials_linkedin_open_profile": {
-        await requireProAccess();
-        let profileUrl = (args as { profile_url: string }).profile_url;
-
-        // Normalize the URL
-        if (!profileUrl.startsWith("http")) {
-          if (profileUrl.startsWith("/in/")) {
-            profileUrl = `https://www.linkedin.com${profileUrl}`;
-          } else if (profileUrl.startsWith("in/")) {
-            profileUrl = `https://www.linkedin.com/${profileUrl}`;
-          } else {
-            profileUrl = `https://www.linkedin.com/in/${profileUrl}`;
-          }
-        }
-
-        const result = await bridge.navigateTo(profileUrl);
-
-        return {
-          content: [
-            {
-              type: "text",
-              text: JSON.stringify({
-                success: true,
-                url: result.url,
-                tabId: result.tabId,
-                message: `Navigated to LinkedIn profile. Use socials_linkedin_get_profile to extract info.`,
-              }),
-            },
-          ],
-        };
-      }
-
-      case "socials_linkedin_get_profile": {
-        await requireProAccess();
-        const result = await bridge.linkedinGetProfile();
-
-        return {
-          content: [
-            {
-              type: "text",
-              text: JSON.stringify({
-                success: result.success,
-                profile: result.profile,
-                error: result.error,
-              }),
-            },
-          ],
-        };
-      }
-
-      case "socials_linkedin_profile_connect": {
-        await requireProAccess();
-        const note = (args as { note?: string })?.note;
-        const result = await bridge.linkedinProfileConnect(note);
-
-        return {
-          content: [
-            {
-              type: "text",
-              text: JSON.stringify({
-                success: result.success,
-                error: result.error,
-                message: result.success
-                  ? "Connection request sent successfully"
-                  : result.error,
-              }),
-            },
-          ],
-        };
-      }
-
-      case "socials_linkedin_engage_post": {
-        await requireProAccess();
-        const parsed = LinkedInEngagePostSchema.parse(args);
-        const result = await bridge.linkedinEngagePost({
-          platform: parsed.platform,
-          postId: parsed.post_id,
-          actions: parsed.actions,
-        });
-
-        return {
-          content: [
-            {
-              type: "text",
-              text: JSON.stringify({
-                success: result.success,
-                results: result.results,
-                error: result.error,
-              }),
-            },
-          ],
-        };
-      }
-
       case "socials_linkedin_posts_search": {
         await requireProAccess();
         const parsed = LinkedInPostsSearchSchema.parse(args);
@@ -1345,6 +1213,96 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           ],
         };
       }
+
+      // ============ V2 Intent-Oriented Handlers ============
+
+      case "socials_linkedin_connect": {
+        await requireProAccess();
+        const profileUrl = (args as { profile_url: string }).profile_url;
+        const note = (args as { note?: string }).note;
+        const result = await bridge.linkedinConnectV2(profileUrl, note);
+
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(result),
+            },
+          ],
+        };
+      }
+
+      case "socials_linkedin_profile": {
+        await requireProAccess();
+        const profileUrl = (args as { profile_url: string }).profile_url;
+        const result = await bridge.linkedinProfileV2(profileUrl);
+
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(result),
+            },
+          ],
+        };
+      }
+
+      case "socials_linkedin_connection_status": {
+        await requireProAccess();
+        const profileUrl = (args as { profile_url: string }).profile_url;
+        const result = await bridge.linkedinConnectionStatus(profileUrl);
+
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(result),
+            },
+          ],
+        };
+      }
+
+      case "socials_linkedin_engage": {
+        await requireProAccess();
+        const postId = (args as { post_id: string }).post_id;
+        const actions = (args as { actions: string[] }).actions as Array<
+          "like" | "repost" | "quote_repost"
+        >;
+        const result = await bridge.linkedinEngagePost({
+          platform: "linkedin",
+          postId,
+          actions,
+        });
+
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify({
+                success: result.success,
+                results: result.results,
+                error: result.error,
+              }),
+            },
+          ],
+        };
+      }
+
+      // TODO: Re-enable when LinkedIn UI selectors are updated
+      // case "socials_linkedin_create_post": {
+      //   await requireProAccess();
+      //   const content = (args as { content: string }).content;
+      //   const result = await bridge.linkedinCreatePost(content);
+      //
+      //   return {
+      //     content: [
+      //       {
+      //         type: "text",
+      //         text: JSON.stringify(result),
+      //       },
+      //     ],
+      //   };
+      // }
 
       default:
         throw new Error(`Unknown tool: ${name}`);

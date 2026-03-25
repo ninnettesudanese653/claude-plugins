@@ -19,6 +19,9 @@ import type {
   EngageActionType,
   LinkedInEngagePostPayload,
   LinkedInEngageActionType,
+  LinkedInActionResult,
+  LinkedInConnectionStatus,
+  LinkedInProfile,
 } from "./types.js";
 
 const BRIDGE_PORT = 9847; // Port for extension to connect to
@@ -557,6 +560,62 @@ export class ExtensionBridge {
       "linkedin_posts_search",
       { query }
     );
+  }
+
+  // ============ V2 Intent-Oriented Methods ============
+  // These handle navigation internally and return rich status
+
+  /**
+   * Unified connect - navigates to profile and sends connection request.
+   * Returns rich status on any outcome.
+   */
+  async linkedinConnectV2(profileUrl: string, note?: string): Promise<LinkedInActionResult> {
+    return this.sendRequest<LinkedInActionResult>("linkedin_connect_v2", {
+      profile_url: profileUrl,
+      note,
+    });
+  }
+
+  /**
+   * Unified profile - navigates to profile and extracts data in one call.
+   */
+  async linkedinProfileV2(profileUrl: string): Promise<LinkedInActionResult & { profile?: LinkedInProfile }> {
+    return this.sendRequest<LinkedInActionResult & { profile?: LinkedInProfile }>(
+      "linkedin_profile_v2",
+      { profile_url: profileUrl }
+    );
+  }
+
+  /**
+   * Get connection status without taking action.
+   */
+  async linkedinConnectionStatus(profileUrl: string): Promise<{
+    success: boolean;
+    status: LinkedInConnectionStatus;
+    error?: string;
+  }> {
+    return this.sendRequest<{
+      success: boolean;
+      status: LinkedInConnectionStatus;
+      error?: string;
+    }>("linkedin_connection_status", { profile_url: profileUrl });
+  }
+
+  /**
+   * Unified engage - accepts post URL, navigates if needed, performs actions.
+   */
+  async linkedinEngageV2(postUrl: string, actions: LinkedInEngageActionType[]): Promise<LinkedInActionResult> {
+    return this.sendRequest<LinkedInActionResult>("linkedin_engage_v2", {
+      post_url: postUrl,
+      actions,
+    });
+  }
+
+  /**
+   * Create a new LinkedIn post.
+   */
+  async linkedinCreatePost(content: string): Promise<LinkedInActionResult> {
+    return this.sendRequest<LinkedInActionResult>("linkedin_create_post", { content });
   }
 
   stop(): void {

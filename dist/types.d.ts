@@ -10,7 +10,7 @@ export interface ExtensionResponse {
     data?: unknown;
     error?: string;
 }
-export type ExtensionMessageType = "ping" | "check_pro_access" | "get_current_user" | "get_feed_posts" | "get_post_context" | "generate_reply" | "submit_reply" | "list_personas" | "get_settings" | "open_tab" | "navigate_to" | "get_active_tab" | "get_agent_tab" | "focus_agent_tab" | "set_agent_tab" | "reload_tab" | "close_tab" | "get_page_content" | "quick_reply" | "create_post" | "engage_post" | "x_search" | "scroll_page" | "linkedin_people_search" | "linkedin_get_people" | "linkedin_connect" | "linkedin_next_page" | "linkedin_go_to_page" | "linkedin_get_profile" | "linkedin_profile_connect" | "linkedin_engage_post" | "linkedin_posts_search";
+export type ExtensionMessageType = "ping" | "check_pro_access" | "get_current_user" | "get_feed_posts" | "get_post_context" | "generate_reply" | "submit_reply" | "list_personas" | "get_settings" | "open_tab" | "navigate_to" | "get_active_tab" | "get_agent_tab" | "focus_agent_tab" | "set_agent_tab" | "reload_tab" | "close_tab" | "get_page_content" | "quick_reply" | "create_post" | "engage_post" | "x_search" | "scroll_page" | "linkedin_people_search" | "linkedin_get_people" | "linkedin_connect" | "linkedin_next_page" | "linkedin_go_to_page" | "linkedin_get_profile" | "linkedin_profile_connect" | "linkedin_engage_post" | "linkedin_posts_search" | "linkedin_connect_v2" | "linkedin_profile_v2" | "linkedin_connection_status" | "linkedin_engage_v2" | "linkedin_create_post";
 export interface GetFeedPostsPayload {
     platform: PlatformType;
     count?: number;
@@ -150,5 +150,38 @@ export interface LinkedInProfile {
         years?: string;
     }>;
     skills?: string[];
+}
+/** Connection status on LinkedIn */
+export type LinkedInConnectionStatus = "connected" | "pending_sent" | "pending_received" | "not_connected" | "follow_only" | "unknown";
+/** Rich error response for better diagnostics */
+export interface LinkedInActionResult {
+    success: boolean;
+    error_code?: "already_connected" | "pending_sent" | "pending_received" | "follow_only" | "button_not_found" | "navigation_failed" | "timeout" | "rate_limited" | "unknown";
+    error?: string;
+    status?: LinkedInConnectionStatus;
+    actions_available?: string[];
+    data?: unknown;
+}
+/** Unified connect payload - handles navigation internally */
+export interface LinkedInConnectV2Payload {
+    profile_url: string;
+    note?: string;
+}
+/** Unified profile payload - navigates and extracts in one call */
+export interface LinkedInProfileV2Payload {
+    profile_url: string;
+}
+/** Connection status query payload */
+export interface LinkedInConnectionStatusPayload {
+    profile_url: string;
+}
+/** Unified engage payload - accepts URL, handles navigation */
+export interface LinkedInEngageV2Payload {
+    post_url: string;
+    actions: LinkedInEngageActionType[];
+}
+/** LinkedIn create post payload */
+export interface LinkedInCreatePostPayload {
+    content: string;
 }
 //# sourceMappingURL=types.d.ts.map

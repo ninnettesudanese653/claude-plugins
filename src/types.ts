@@ -52,7 +52,13 @@ export type ExtensionMessageType =
   // LinkedIn Engagement
   | "linkedin_engage_post"
   // LinkedIn Search
-  | "linkedin_posts_search";
+  | "linkedin_posts_search"
+  // Unified LinkedIn Tools (v2 - intent-oriented)
+  | "linkedin_connect_v2"
+  | "linkedin_profile_v2"
+  | "linkedin_connection_status"
+  | "linkedin_engage_v2"
+  | "linkedin_create_post";
 
 // Payloads for each message type
 export interface GetFeedPostsPayload {
@@ -207,4 +213,61 @@ export interface LinkedInProfile {
     years?: string;
   }>;
   skills?: string[];
+}
+
+// ============ V2 Intent-Oriented Types ============
+
+/** Connection status on LinkedIn */
+export type LinkedInConnectionStatus =
+  | "connected"
+  | "pending_sent"
+  | "pending_received"
+  | "not_connected"
+  | "follow_only"
+  | "unknown";
+
+/** Rich error response for better diagnostics */
+export interface LinkedInActionResult {
+  success: boolean;
+  error_code?:
+    | "already_connected"
+    | "pending_sent"
+    | "pending_received"
+    | "follow_only"
+    | "button_not_found"
+    | "navigation_failed"
+    | "timeout"
+    | "rate_limited"
+    | "unknown";
+  error?: string;
+  status?: LinkedInConnectionStatus;
+  actions_available?: string[];
+  data?: unknown;
+}
+
+/** Unified connect payload - handles navigation internally */
+export interface LinkedInConnectV2Payload {
+  profile_url: string;
+  note?: string;
+}
+
+/** Unified profile payload - navigates and extracts in one call */
+export interface LinkedInProfileV2Payload {
+  profile_url: string;
+}
+
+/** Connection status query payload */
+export interface LinkedInConnectionStatusPayload {
+  profile_url: string;
+}
+
+/** Unified engage payload - accepts URL, handles navigation */
+export interface LinkedInEngageV2Payload {
+  post_url: string;
+  actions: LinkedInEngageActionType[];
+}
+
+/** LinkedIn create post payload */
+export interface LinkedInCreatePostPayload {
+  content: string;
 }

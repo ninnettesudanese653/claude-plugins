@@ -1,4 +1,4 @@
-import type { UserInfo, FeedPost, PostContext, PersonaInfo, GenerateResult, CreatePostPayload, EngagePostPayload, EngageActionType, LinkedInEngagePostPayload, LinkedInEngageActionType } from "./types.js";
+import type { UserInfo, FeedPost, PostContext, PersonaInfo, GenerateResult, CreatePostPayload, EngagePostPayload, EngageActionType, LinkedInEngagePostPayload, LinkedInEngageActionType, LinkedInActionResult, LinkedInConnectionStatus, LinkedInProfile } from "./types.js";
 export declare class ExtensionBridge {
     private wss;
     /** True after the WebSocket server has bound to BRIDGE_PORT (extension can dial in). */
@@ -184,6 +184,33 @@ export declare class ExtensionBridge {
         url?: string;
         error?: string;
     }>;
+    /**
+     * Unified connect - navigates to profile and sends connection request.
+     * Returns rich status on any outcome.
+     */
+    linkedinConnectV2(profileUrl: string, note?: string): Promise<LinkedInActionResult>;
+    /**
+     * Unified profile - navigates to profile and extracts data in one call.
+     */
+    linkedinProfileV2(profileUrl: string): Promise<LinkedInActionResult & {
+        profile?: LinkedInProfile;
+    }>;
+    /**
+     * Get connection status without taking action.
+     */
+    linkedinConnectionStatus(profileUrl: string): Promise<{
+        success: boolean;
+        status: LinkedInConnectionStatus;
+        error?: string;
+    }>;
+    /**
+     * Unified engage - accepts post URL, navigates if needed, performs actions.
+     */
+    linkedinEngageV2(postUrl: string, actions: LinkedInEngageActionType[]): Promise<LinkedInActionResult>;
+    /**
+     * Create a new LinkedIn post.
+     */
+    linkedinCreatePost(content: string): Promise<LinkedInActionResult>;
     stop(): void;
 }
 //# sourceMappingURL=extension-bridge.d.ts.map
