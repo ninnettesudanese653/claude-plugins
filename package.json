@@ -33,12 +33,10 @@
     ".claude-plugin",
     ".mcp.json",
     "dist",
-    "scripts",
     "src",
     "README.md",
     "LICENSE",
-    "SECURITY.md",
-    "claude_desktop_config.example.json"
+    "SECURITY.md"
   ],
   "scripts": {
     "build": "esbuild src/index.ts --bundle --platform=node --target=node18 --format=cjs --outfile=dist/index.cjs",
