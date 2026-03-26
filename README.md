@@ -1,6 +1,12 @@
-# Socials
+<p align="center">
+  <img src="https://www.brainrotcreations.com/og/projects-socials/default.png" alt="Socials" width="100%" />
+</p>
 
-Give Claude superpowers on X, LinkedIn, and Reddit.
+<h1 align="center">Socials</h1>
+
+<p align="center">
+  <strong>Give Claude superpowers on X, LinkedIn, and Reddit.</strong>
+</p>
 
 ```
 /plugin marketplace add Brainrot-Creations/claude-plugins
