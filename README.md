@@ -20,7 +20,7 @@ A Claude Code plugin that connects Claude to the [Socials](https://socials.brain
 
 | Thing | Why |
 |-------|-----|
-| [Socials extension](https://socials.brainrotcreations.com) | The bridge between Claude and your browser |
+| [Socials extension](https://chromewebstore.google.com/detail/socials-generate-posts-in/pmpemhbbmaicdmnlmenopaclpdfnllje) | The bridge between Claude and your browser |
 | [Claude Code](https://claude.ai/code) | Where the magic happens |
 | Node.js 18+ | Runs the MCP server |
 
