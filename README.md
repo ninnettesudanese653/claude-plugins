@@ -144,6 +144,8 @@ Break it. Rebuild it. Make it yours.
 
 **Security** — [SECURITY.md](./SECURITY.md)
 
+**Issues or questions?** — [contact@brainrotcreations.com](mailto:contact@brainrotcreations.com)
+
 ---
 
 <p align="center">
