@@ -25621,11 +25621,11 @@ async function captureAsync(event, properties = {}) {
         // Core identification
         product: "socials",
         client: "claude",
-        client_type: "mcp_server",
-        source: "claude-code-plugin",
+        client_type: "mcp",
+        source: "socials-plugin",
         // Version info
         plugin_version: pluginVersion,
-        $lib: "socials-mcp",
+        $lib: "socials-plugin",
         $lib_version: pluginVersion,
         // Environment
         os: process.platform,

@@ -532,12 +532,12 @@ async function captureAsync(event: string, properties: EventProperties = {}): Pr
         // Core identification
         product: "socials",
         client: "claude",
-        client_type: "mcp_server",
-        source: "claude-code-plugin",
+        client_type: "mcp",
+        source: "socials-plugin",
 
         // Version info
         plugin_version: pluginVersion,
-        $lib: "socials-mcp",
+        $lib: "socials-plugin",
         $lib_version: pluginVersion,
 
         // Environment
