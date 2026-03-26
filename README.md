@@ -2,11 +2,11 @@
 
 Give Claude superpowers on X, LinkedIn, and Reddit.
 
-```bash
-claude mcp add brainrot-creations/claude-plugins
+```
+/plugin marketplace add Brainrot-Creations/claude-plugins
 ```
 
-That's it. You're done.
+Run that in Claude Code. That's it.
 
 ---
 
@@ -28,8 +28,8 @@ A Claude Code plugin that connects Claude to the [Socials](https://socials.brain
 
 **Option 1: Marketplace (recommended)**
 
-```bash
-claude mcp add brainrot-creations/claude-plugins
+```
+/plugin marketplace add Brainrot-Creations/claude-plugins
 ```
 
 **Option 2: Clone it yourself**
