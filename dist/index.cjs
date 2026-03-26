@@ -25297,7 +25297,7 @@ function getAnonymousMachineId() {
   return (0, import_crypto2.createHash)("sha256").update(raw).digest("hex").slice(0, 16);
 }
 var anonymousMachineId = getAnonymousMachineId();
-var pluginVersion = "1.0.24";
+var pluginVersion = "1.0.25";
 var userId = null;
 var userEmail = null;
 var userTier = null;
@@ -25617,6 +25617,8 @@ async function captureAsync(event, properties = {}) {
     posthog.capture({
       distinctId,
       event,
+      // Include active feature flags with the event for enriched analytics
+      sendFeatureFlags: true,
       properties: {
         // Core identification
         product: "socials",
@@ -27312,7 +27314,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
               type: "text",
               text: JSON.stringify({
                 status: "ok",
-                version: "1.0.24",
+                version: "1.0.25",
                 extension_connected: extensionConnected,
                 health,
                 engagement,

@@ -25,7 +25,7 @@ function getAnonymousMachineId(): string {
 }
 
 const anonymousMachineId = getAnonymousMachineId();
-const pluginVersion = "1.0.24";
+const pluginVersion = "1.0.25";
 
 // User identity from extension (set when extension connects)
 let userId: string | null = null;
@@ -528,6 +528,8 @@ async function captureAsync(event: string, properties: EventProperties = {}): Pr
     posthog.capture({
       distinctId,
       event,
+      // Include active feature flags with the event for enriched analytics
+      sendFeatureFlags: true,
       properties: {
         // Core identification
         product: "socials",
