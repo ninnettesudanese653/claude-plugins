@@ -9,12 +9,6 @@
 </p>
 
 ```bash
-claude -p "Run: /plugin marketplace add Brainrot-Creations/claude-plugins then /plugin install socials@brainrot-creations"
-```
-
-Or run them one by one:
-
-```bash
 claude
 ```
 ```
