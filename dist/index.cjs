@@ -25297,7 +25297,7 @@ function getAnonymousMachineId() {
   return (0, import_crypto2.createHash)("sha256").update(raw).digest("hex").slice(0, 16);
 }
 var anonymousMachineId = getAnonymousMachineId();
-var pluginVersion = "1.0.26";
+var pluginVersion = "1.0.27";
 var userId = null;
 var userEmail = null;
 var userTier = null;
@@ -25539,6 +25539,34 @@ async function isToolEnabledAsync(toolName) {
 function getDisabledTools() {
   return Object.keys(ToolFlags).filter((tool) => !isToolEnabled(tool));
 }
+function getToolFlagName(toolName) {
+  return ToolFlags[toolName] || null;
+}
+function trackFeatureView(flagName) {
+  const distinctId = getDistinctId();
+  posthog.capture({
+    distinctId,
+    event: "$feature_view",
+    properties: {
+      feature_flag: flagName,
+      product: "socials",
+      client: "claude"
+    }
+  });
+}
+function trackFeatureInteraction(flagName) {
+  const distinctId = getDistinctId();
+  posthog.capture({
+    distinctId,
+    event: "$feature_interaction",
+    properties: {
+      feature_flag: flagName,
+      product: "socials",
+      client: "claude",
+      $set: { [`$feature_interaction/${flagName}`]: true }
+    }
+  });
+}
 function getFeatureGatingStatus() {
   return {
     platforms: {
@@ -25681,12 +25709,18 @@ async function trackToolUsage(toolName, platform, success = true, durationMs) {
   toolCallCount++;
   await captureAsync("mcp_tool_called", {
     tool: toolName,
-    social_platform: platform || "unknown",
+    social_platform: platform || null,
     success,
     duration_ms: durationMs,
     is_slow: durationMs ? durationMs > 5e3 : void 0
   });
   lastToolName = toolName;
+  if (success) {
+    const flagName = ToolFlags[toolName];
+    if (flagName) {
+      trackFeatureInteraction(flagName);
+    }
+  }
 }
 async function trackError(toolName, errorMessage) {
   const msg = errorMessage.toLowerCase();
@@ -26693,6 +26727,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       };
     }
   }
+  const toolFlagName = getToolFlagName(name);
+  if (toolFlagName) {
+    trackFeatureView(toolFlagName);
+  }
   try {
     switch (name) {
       case "socials_check_access": {
@@ -27314,7 +27352,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
               type: "text",
               text: JSON.stringify({
                 status: "ok",
-                version: "1.0.26",
+                version: "1.0.27",
                 extension_connected: extensionConnected,
                 health,
                 engagement,

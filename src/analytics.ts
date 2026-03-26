@@ -25,7 +25,7 @@ function getAnonymousMachineId(): string {
 }
 
 const anonymousMachineId = getAnonymousMachineId();
-const pluginVersion = "1.0.26";
+const pluginVersion = "1.0.27";
 
 // User identity from extension (set when extension connects)
 let userId: string | null = null;
@@ -394,6 +394,48 @@ export function getDisabledTools(): string[] {
   return Object.keys(ToolFlags).filter(tool => !isToolEnabled(tool));
 }
 
+/**
+ * Get the feature flag name for a tool (if any)
+ */
+export function getToolFlagName(toolName: string): string | null {
+  return ToolFlags[toolName] || null;
+}
+
+/**
+ * Track when a feature flag is viewed (tool is called)
+ * Sends $feature_view event for enriched flag analytics
+ */
+export function trackFeatureView(flagName: string): void {
+  const distinctId = getDistinctId();
+  posthog.capture({
+    distinctId,
+    event: "$feature_view",
+    properties: {
+      feature_flag: flagName,
+      product: "socials",
+      client: "claude",
+    },
+  });
+}
+
+/**
+ * Track when a feature flag is interacted with (tool is successfully used)
+ * Sends $feature_interaction event and sets person property for enriched flag analytics
+ */
+export function trackFeatureInteraction(flagName: string): void {
+  const distinctId = getDistinctId();
+  posthog.capture({
+    distinctId,
+    event: "$feature_interaction",
+    properties: {
+      feature_flag: flagName,
+      product: "socials",
+      client: "claude",
+      $set: { [`$feature_interaction/${flagName}`]: true },
+    },
+  });
+}
+
 export function getFeatureGatingStatus(): {
   platforms: Record<string, boolean>;
   tools: Record<string, boolean>;
@@ -609,16 +651,24 @@ export function trackExtensionDisconnected(): void {
 
 // ============ Tool Usage Events ============
 
-export async function trackToolUsage(toolName: string, platform?: string, success: boolean = true, durationMs?: number): Promise<void> {
+export async function trackToolUsage(toolName: string, platform?: string | null, success: boolean = true, durationMs?: number): Promise<void> {
   toolCallCount++;
   await captureAsync("mcp_tool_called", {
     tool: toolName,
-    social_platform: platform || "unknown",
+    social_platform: platform || null,
     success,
     duration_ms: durationMs,
     is_slow: durationMs ? durationMs > 5000 : undefined,
   });
   lastToolName = toolName;
+
+  // Track feature interaction on successful tool use (enriched flag analytics)
+  if (success) {
+    const flagName = ToolFlags[toolName];
+    if (flagName) {
+      trackFeatureInteraction(flagName);
+    }
+  }
 }
 
 export async function trackError(toolName: string, errorMessage: string): Promise<void> {

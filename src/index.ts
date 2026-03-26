@@ -37,6 +37,9 @@ import {
   ensureFeatureFlagsLoaded,
   forceRefreshFeatureFlags,
   getFeatureGatingStatus,
+  getToolFlagName,
+  trackFeatureView,
+  trackFeatureInteraction,
 } from "./analytics.js";
 
 const bridge = new ExtensionBridge();
@@ -766,6 +769,12 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         isError: true,
       };
     }
+  }
+
+  // Track feature flag view for enriched analytics
+  const toolFlagName = getToolFlagName(name);
+  if (toolFlagName) {
+    trackFeatureView(toolFlagName);
   }
 
   try {
@@ -1525,7 +1534,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
               type: "text",
               text: JSON.stringify({
                 status: "ok",
-                version: "1.0.26",
+                version: "1.0.27",
                 extension_connected: extensionConnected,
                 health,
                 engagement,
