@@ -25618,31 +25618,39 @@ function trackHealthMetrics() {
   const engagement = calculateEngagementScore();
   capture("mcp_health_check", { ...health, engagement_score: engagement.score, engagement_level: engagement.level });
 }
-function capture(event, properties = {}) {
+async function captureAsync(event, properties = {}) {
   const distinctId = getDistinctId();
   const engagement = calculateEngagementScore();
   const health = getHealthMetrics();
-  posthog.capture({
-    distinctId,
-    event,
-    properties: {
-      product: "socials",
-      source: "claude-plugins",
-      plugin_version: pluginVersion,
-      os_platform: process.platform,
-      node_version: process.version,
-      has_user_identity: !!userId,
-      user_tier: userTier,
-      session_tool_count: toolCallCount,
-      session_duration_ms: sessionStartTime ? Date.now() - sessionStartTime : null,
-      previous_tool: lastToolName,
-      engagement_score: engagement.score,
-      engagement_level: engagement.level,
-      memory_mb: health.memory_usage_mb,
-      extension_latency_ms: health.last_extension_latency_ms,
-      $groups: userTier ? { subscription_tier: userTier } : void 0,
-      ...properties
-    }
+  try {
+    await posthog.captureImmediate({
+      distinctId,
+      event,
+      properties: {
+        product: "socials",
+        source: "claude-plugins",
+        plugin_version: pluginVersion,
+        os_platform: process.platform,
+        node_version: process.version,
+        has_user_identity: !!userId,
+        user_tier: userTier,
+        session_tool_count: toolCallCount,
+        session_duration_ms: sessionStartTime ? Date.now() - sessionStartTime : null,
+        previous_tool: lastToolName,
+        engagement_score: engagement.score,
+        engagement_level: engagement.level,
+        memory_mb: health.memory_usage_mb,
+        extension_latency_ms: health.last_extension_latency_ms,
+        $groups: userTier ? { subscription_tier: userTier } : void 0,
+        ...properties
+      }
+    });
+  } catch (error2) {
+    console.error(`[socials-plugin] Failed to send event ${event}:`, error2);
+  }
+}
+function capture(event, properties = {}) {
+  captureAsync(event, properties).catch(() => {
   });
 }
 function createTimer() {
@@ -25666,9 +25674,9 @@ function trackExtensionDisconnected() {
     final_engagement_level: engagement.level
   });
 }
-function trackToolUsage(toolName, platform, success = true, durationMs) {
+async function trackToolUsage(toolName, platform, success = true, durationMs) {
   toolCallCount++;
-  capture("mcp_tool_called", {
+  await captureAsync("mcp_tool_called", {
     tool: toolName,
     social_platform: platform || "unknown",
     success,
@@ -25677,10 +25685,10 @@ function trackToolUsage(toolName, platform, success = true, durationMs) {
   });
   lastToolName = toolName;
 }
-function trackError(toolName, errorMessage) {
+async function trackError(toolName, errorMessage) {
   const msg = errorMessage.toLowerCase();
   const category = msg.includes("not connected") || msg.includes("websocket") ? "connection" : msg.includes("pro access") || msg.includes("permission") ? "permission" : msg.includes("timeout") ? "timeout" : msg.includes("rate limit") ? "rate_limit" : msg.includes("not found") ? "not_found" : msg.includes("invalid") ? "validation" : "unknown";
-  capture("mcp_tool_error", { tool: toolName, error: errorMessage.slice(0, 200), error_category: category });
+  await captureAsync("mcp_tool_error", { tool: toolName, error: errorMessage.slice(0, 200), error_category: category });
 }
 function analyzeContent(content) {
   const hashtags = content.match(/#\w+/g) || [];
@@ -26726,7 +26734,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         } catch {
         }
         trackExtensionConnected(tier);
-        trackToolUsage(name, platform, true, getElapsed());
+        await trackToolUsage(name, platform, true, getElapsed());
         return {
           content: [
             {
@@ -26753,7 +26761,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         );
         const elapsed = getElapsed();
         trackFeedViewed(parsed.platform, posts.length, elapsed);
-        trackToolUsage(name, parsed.platform, true, elapsed);
+        await trackToolUsage(name, parsed.platform, true, elapsed);
         return {
           content: [
             {
@@ -26823,7 +26831,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         const result = await bridge.quickReply(postId, content);
         const elapsed = getElapsed();
         trackReplySent("x", content, result.success, elapsed);
-        trackToolUsage(name, "x", result.success, elapsed);
+        await trackToolUsage(name, "x", result.success, elapsed);
         return {
           content: [
             {
@@ -26845,7 +26853,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         });
         const elapsed = getElapsed();
         trackPostCreated(parsed.platform, parsed.content, result.success, elapsed);
-        trackToolUsage(name, parsed.platform, result.success, elapsed);
+        await trackToolUsage(name, parsed.platform, result.success, elapsed);
         return {
           content: [
             {
@@ -26868,7 +26876,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         });
         const elapsed = getElapsed();
         trackEngagement(parsed.platform, parsed.actions, result.success, elapsed);
-        trackToolUsage(name, parsed.platform, result.success, elapsed);
+        await trackToolUsage(name, parsed.platform, result.success, elapsed);
         return {
           content: [
             {
@@ -26888,7 +26896,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         const result = await bridge.xSearch({ query: parsed.query });
         const elapsed = getElapsed();
         trackSearch("x", "posts", result.success, elapsed);
-        trackToolUsage(name, "x", result.success, elapsed);
+        await trackToolUsage(name, "x", result.success, elapsed);
         return {
           content: [
             {
@@ -27094,7 +27102,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         const result = await bridge.linkedinPeopleSearch(query);
         const elapsed = getElapsed();
         trackSearch("linkedin", "people", result.success, elapsed);
-        trackToolUsage(name, "linkedin", result.success, elapsed);
+        await trackToolUsage(name, "linkedin", result.success, elapsed);
         return {
           content: [
             {
@@ -27168,7 +27176,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         const result = await bridge.linkedinPostsSearch(parsed.query);
         const elapsed = getElapsed();
         trackSearch("linkedin", "posts", result.success, elapsed);
-        trackToolUsage(name, "linkedin", result.success, elapsed);
+        await trackToolUsage(name, "linkedin", result.success, elapsed);
         return {
           content: [
             {
@@ -27191,7 +27199,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         const result = await bridge.linkedinConnectV2(profileUrl, note);
         const elapsed = getElapsed();
         trackConnectionRequest(result.success, !!note, elapsed);
-        trackToolUsage(name, "linkedin", result.success, elapsed);
+        await trackToolUsage(name, "linkedin", result.success, elapsed);
         return {
           content: [
             {
@@ -27207,7 +27215,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         const result = await bridge.linkedinProfileV2(profileUrl);
         const elapsed = getElapsed();
         trackProfileViewed(result.success, elapsed);
-        trackToolUsage(name, "linkedin", result.success, elapsed);
+        await trackToolUsage(name, "linkedin", result.success, elapsed);
         return {
           content: [
             {
@@ -27241,7 +27249,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         });
         const elapsed = getElapsed();
         trackEngagement("linkedin", actions, result.success, elapsed);
-        trackToolUsage(name, "linkedin", result.success, elapsed);
+        await trackToolUsage(name, "linkedin", result.success, elapsed);
         return {
           content: [
             {
@@ -27285,7 +27293,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
               type: "text",
               text: JSON.stringify({
                 status: "ok",
-                version: "1.0.21",
+                version: "1.0.22",
                 extension_connected: extensionConnected,
                 health,
                 engagement,
@@ -27301,8 +27309,8 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     }
   } catch (error2) {
     const errorMessage = error2 instanceof Error ? error2.message : "Unknown error";
-    trackError(name, errorMessage);
-    trackToolUsage(name, platform, false, getElapsed());
+    await trackError(name, errorMessage);
+    await trackToolUsage(name, platform, false, getElapsed());
     return {
       content: [
         {

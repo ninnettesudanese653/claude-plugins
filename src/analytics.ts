@@ -526,33 +526,49 @@ export function trackHealthMetrics(): void {
 
 // ============ Core Event Capture ============
 
-function capture(event: string, properties: EventProperties = {}): void {
+/**
+ * Capture an event to PostHog using captureImmediate for guaranteed delivery.
+ * This is critical for MCP servers which may be short-lived.
+ */
+async function captureAsync(event: string, properties: EventProperties = {}): Promise<void> {
   const distinctId = getDistinctId();
   const engagement = calculateEngagementScore();
   const health = getHealthMetrics();
 
-  posthog.capture({
-    distinctId,
-    event,
-    properties: {
-      product: "socials",
-      source: "claude-plugins",
-      plugin_version: pluginVersion,
-      os_platform: process.platform,
-      node_version: process.version,
-      has_user_identity: !!userId,
-      user_tier: userTier,
-      session_tool_count: toolCallCount,
-      session_duration_ms: sessionStartTime ? Date.now() - sessionStartTime : null,
-      previous_tool: lastToolName,
-      engagement_score: engagement.score,
-      engagement_level: engagement.level,
-      memory_mb: health.memory_usage_mb,
-      extension_latency_ms: health.last_extension_latency_ms,
-      $groups: userTier ? { subscription_tier: userTier } : undefined,
-      ...properties,
-    },
-  });
+  try {
+    await posthog.captureImmediate({
+      distinctId,
+      event,
+      properties: {
+        product: "socials",
+        source: "claude-plugins",
+        plugin_version: pluginVersion,
+        os_platform: process.platform,
+        node_version: process.version,
+        has_user_identity: !!userId,
+        user_tier: userTier,
+        session_tool_count: toolCallCount,
+        session_duration_ms: sessionStartTime ? Date.now() - sessionStartTime : null,
+        previous_tool: lastToolName,
+        engagement_score: engagement.score,
+        engagement_level: engagement.level,
+        memory_mb: health.memory_usage_mb,
+        extension_latency_ms: health.last_extension_latency_ms,
+        $groups: userTier ? { subscription_tier: userTier } : undefined,
+        ...properties,
+      },
+    });
+  } catch (error) {
+    // Log but don't throw - analytics shouldn't break the app
+    console.error(`[socials-plugin] Failed to send event ${event}:`, error);
+  }
+}
+
+/**
+ * Fire-and-forget capture for non-critical events (backwards compat)
+ */
+function capture(event: string, properties: EventProperties = {}): void {
+  captureAsync(event, properties).catch(() => {});
 }
 
 // ============ Timing Utility ============
@@ -586,9 +602,9 @@ export function trackExtensionDisconnected(): void {
 
 // ============ Tool Usage Events ============
 
-export function trackToolUsage(toolName: string, platform?: string, success: boolean = true, durationMs?: number): void {
+export async function trackToolUsage(toolName: string, platform?: string, success: boolean = true, durationMs?: number): Promise<void> {
   toolCallCount++;
-  capture("mcp_tool_called", {
+  await captureAsync("mcp_tool_called", {
     tool: toolName,
     social_platform: platform || "unknown",
     success,
@@ -598,7 +614,7 @@ export function trackToolUsage(toolName: string, platform?: string, success: boo
   lastToolName = toolName;
 }
 
-export function trackError(toolName: string, errorMessage: string): void {
+export async function trackError(toolName: string, errorMessage: string): Promise<void> {
   const msg = errorMessage.toLowerCase();
   const category = msg.includes("not connected") || msg.includes("websocket") ? "connection"
     : msg.includes("pro access") || msg.includes("permission") ? "permission"
@@ -608,7 +624,7 @@ export function trackError(toolName: string, errorMessage: string): void {
     : msg.includes("invalid") ? "validation"
     : "unknown";
 
-  capture("mcp_tool_error", { tool: toolName, error: errorMessage.slice(0, 200), error_category: category });
+  await captureAsync("mcp_tool_error", { tool: toolName, error: errorMessage.slice(0, 200), error_category: category });
 }
 
 // ============ Action-Specific Events ============

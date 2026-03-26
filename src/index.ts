@@ -830,7 +830,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
         // Track successful connection and tool usage with timing
         trackExtensionConnected(tier);
-        trackToolUsage(name, platform, true, getElapsed());
+        await trackToolUsage(name, platform, true, getElapsed());
 
         return {
           content: [
@@ -865,7 +865,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         // Track feed view with timing
         const elapsed = getElapsed();
         trackFeedViewed(parsed.platform, posts.length, elapsed);
-        trackToolUsage(name, parsed.platform, true, elapsed);
+        await trackToolUsage(name, parsed.platform, true, elapsed);
 
         return {
           content: [
@@ -946,7 +946,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         // Track reply sent with content analysis and timing
         const elapsed = getElapsed();
         trackReplySent("x", content, result.success, elapsed);
-        trackToolUsage(name, "x", result.success, elapsed);
+        await trackToolUsage(name, "x", result.success, elapsed);
 
         return {
           content: [
@@ -972,7 +972,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         // Track post created with content analysis and timing
         const elapsed = getElapsed();
         trackPostCreated(parsed.platform, parsed.content, result.success, elapsed);
-        trackToolUsage(name, parsed.platform, result.success, elapsed);
+        await trackToolUsage(name, parsed.platform, result.success, elapsed);
 
         return {
           content: [
@@ -999,7 +999,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         // Track engagement with timing
         const elapsed = getElapsed();
         trackEngagement(parsed.platform, parsed.actions, result.success, elapsed);
-        trackToolUsage(name, parsed.platform, result.success, elapsed);
+        await trackToolUsage(name, parsed.platform, result.success, elapsed);
 
         return {
           content: [
@@ -1023,7 +1023,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         // Track search with timing
         const elapsed = getElapsed();
         trackSearch("x", "posts", result.success, elapsed);
-        trackToolUsage(name, "x", result.success, elapsed);
+        await trackToolUsage(name, "x", result.success, elapsed);
 
         return {
           content: [
@@ -1268,7 +1268,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         // Track search with timing
         const elapsed = getElapsed();
         trackSearch("linkedin", "people", result.success, elapsed);
-        trackToolUsage(name, "linkedin", result.success, elapsed);
+        await trackToolUsage(name, "linkedin", result.success, elapsed);
 
         return {
           content: [
@@ -1358,7 +1358,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         // Track search with timing
         const elapsed = getElapsed();
         trackSearch("linkedin", "posts", result.success, elapsed);
-        trackToolUsage(name, "linkedin", result.success, elapsed);
+        await trackToolUsage(name, "linkedin", result.success, elapsed);
 
         return {
           content: [
@@ -1388,7 +1388,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         // Track connection request with timing
         const elapsed = getElapsed();
         trackConnectionRequest(result.success, !!note, elapsed);
-        trackToolUsage(name, "linkedin", result.success, elapsed);
+        await trackToolUsage(name, "linkedin", result.success, elapsed);
 
         return {
           content: [
@@ -1408,7 +1408,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         // Track profile viewed with timing
         const elapsed = getElapsed();
         trackProfileViewed(result.success, elapsed);
-        trackToolUsage(name, "linkedin", result.success, elapsed);
+        await trackToolUsage(name, "linkedin", result.success, elapsed);
 
         return {
           content: [
@@ -1450,7 +1450,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         // Track engagement with timing
         const elapsed = getElapsed();
         trackEngagement("linkedin", actions, result.success, elapsed);
-        trackToolUsage(name, "linkedin", result.success, elapsed);
+        await trackToolUsage(name, "linkedin", result.success, elapsed);
 
         return {
           content: [
@@ -1503,7 +1503,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
               type: "text",
               text: JSON.stringify({
                 status: "ok",
-                version: "1.0.21",
+                version: "1.0.22",
                 extension_connected: extensionConnected,
                 health,
                 engagement,
@@ -1522,9 +1522,9 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     const errorMessage =
       error instanceof Error ? error.message : "Unknown error";
 
-    // Track error with timing
-    trackError(name, errorMessage);
-    trackToolUsage(name, platform, false, getElapsed());
+    // Track error with timing - await to ensure events are sent
+    await trackError(name, errorMessage);
+    await trackToolUsage(name, platform, false, getElapsed());
 
     return {
       content: [
