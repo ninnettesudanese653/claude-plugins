@@ -32,11 +32,8 @@
   "files": [
     ".claude-plugin",
     ".mcp.json",
-    "agents",
-    "commands",
     "dist",
     "scripts",
-    "skills",
     "src",
     "README.md",
     "LICENSE",
