@@ -147,12 +147,11 @@ Break it. Rebuild it. Make it yours.
 ---
 
 <p align="center">
-  <sub>Built by <a href="https://brainrotcreations.com">Brainrot Creations</a></sub>
-  &nbsp;
   <a href="https://brainrotcreations.com">
-    <img src="https://www.brainrotcreations.com/logo.svg" alt="Brainrot Creations" height="20" valign="middle" />
+    <img src="https://www.brainrotcreations.com/logo.svg" alt="Brainrot Creations" height="24" />
   </a>
-</p>
-<p align="center">
+  <br>
+  <sub>Built by <a href="https://brainrotcreations.com">Brainrot Creations</a></sub>
+  <br>
   <sub>Open source · Made for fun · No strings attached</sub>
 </p>
