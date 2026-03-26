@@ -30,6 +30,11 @@ claude
 /plugin install socials@brainrot-creations
 ```
 
+**Step 4:** Reload plugins
+```
+/reload-plugins
+```
+
 Done.
 
 ---
