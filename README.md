@@ -11,8 +11,12 @@
 ```
 /plugin marketplace add Brainrot-Creations/claude-plugins
 ```
+or
+```
+/plugin install socials@brainrot-creations
+```
 
-Run that in Claude Code. That's it.
+Run either in Claude Code. That's it.
 
 ---
 
