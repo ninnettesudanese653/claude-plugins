@@ -8,6 +8,8 @@
   <strong>Give Claude superpowers on X, LinkedIn, and Reddit.</strong>
 </p>
 
+**Step 0:** Install the [Socials Chrome extension](https://chromewebstore.google.com/detail/socials-generate-posts-in/pmpemhbbmaicdmnlmenopaclpdfnllje)
+
 Open your terminal and run:
 
 **Step 1:** Start Claude Code
