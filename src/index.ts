@@ -1525,7 +1525,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
               type: "text",
               text: JSON.stringify({
                 status: "ok",
-                version: "1.0.23",
+                version: "1.0.24",
                 extension_connected: extensionConnected,
                 health,
                 engagement,
