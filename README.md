@@ -8,6 +8,8 @@
   <strong>Give Claude superpowers on X, LinkedIn, and Reddit.</strong>
 </p>
 
+Pick one:
+
 ```
 /plugin marketplace add Brainrot-Creations/claude-plugins
 ```
@@ -15,7 +17,7 @@
 /plugin install socials@brainrot-creations
 ```
 
-Run that in Claude Code. That's it.
+Run it in Claude Code. That's it.
 
 ---
 
