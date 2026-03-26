@@ -9,6 +9,9 @@
 </p>
 
 **Step 0:** Install the [Socials Chrome extension](https://chromewebstore.google.com/detail/socials-generate-posts-in/pmpemhbbmaicdmnlmenopaclpdfnllje)
+```
+https://chromewebstore.google.com/detail/socials-generate-posts-in/pmpemhbbmaicdmnlmenopaclpdfnllje
+```
 
 Open your terminal and run:
 
