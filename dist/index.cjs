@@ -26814,14 +26814,14 @@ var allTools = [
   },
   {
     name: "socials_sidebar",
-    description: "Control the Socials extension sidebar (side panel) in the browser. Use action 'open' to show the sidebar UI, 'close' to hide it.",
+    description: "Control the Socials extension sidebar. Use action 'close' to hide the sidebar. Note: 'open' cannot work programmatically (Chrome security) - returns instructions for user to click the extension icon.",
     inputSchema: {
       type: "object",
       properties: {
         action: {
           type: "string",
           enum: ["open", "close"],
-          description: "Whether to open or close the sidebar"
+          description: "Whether to open or close the sidebar (open returns instructions due to Chrome limitation)"
         }
       },
       required: ["action"]
