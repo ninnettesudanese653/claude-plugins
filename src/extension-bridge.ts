@@ -319,19 +319,21 @@ export class ExtensionBridge {
 
   /**
    * Trigger a token refresh / re-authentication in the extension.
-   * This can help recover from expired sessions.
+   * Uses device-based auth if device is registered.
+   * Auto-registers device if user has a session but device isn't registered yet.
    */
-  async refreshAuth(): Promise<{ success: boolean; error?: string }> {
-    return this.sendRequest<{ success: boolean; error?: string }>("refresh_auth", undefined);
+  async refreshAuth(): Promise<{ success: boolean; error?: string; action_required?: string; device_id?: string; registered?: boolean }> {
+    return this.sendRequest<{ success: boolean; error?: string; action_required?: string; device_id?: string; registered?: boolean }>("refresh_auth", undefined);
   }
 
-  async checkProAccess(): Promise<{ isPro: boolean; tier: string; canUseMcp: boolean }> {
-    const result = await this.sendRequest<UserInfo>("check_pro_access", undefined);
+  async checkProAccess(): Promise<{ isPro: boolean; tier: string; canUseMcp: boolean; device_registered?: boolean }> {
+    const result = await this.sendRequest<UserInfo & { device_registered?: boolean }>("check_pro_access", undefined);
     const { isPro, tier, canUseMcp } = result.subscription;
     return {
       isPro,
       tier,
       canUseMcp: canUseMcp ?? isPro,
+      device_registered: result.device_registered,
     };
   }
 

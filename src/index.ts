@@ -756,14 +756,15 @@ const allTools = [
         name: "socials_sidebar",
         description:
           "Control the Socials extension sidebar. " +
-          "Use action 'open' to open the Socials UI in a popup window, 'close' to hide the sidebar.",
+          "action 'close' hides the sidebar. " +
+          "action 'open' returns instructions (Chrome blocks programmatic open - user must click extension icon).",
         inputSchema: {
           type: "object",
           properties: {
             action: {
               type: "string",
               enum: ["open", "close"],
-              description: "Whether to open or close the sidebar",
+              description: "close hides sidebar; open returns user instructions",
             },
           },
           required: ["action"],
@@ -772,9 +773,9 @@ const allTools = [
       {
         name: "socials_refresh_auth",
         description:
-          "Trigger authentication refresh in the Socials extension. " +
-          "Use this when authentication has expired or you need to re-login. " +
-          "Opens the sidebar and triggers token refresh.",
+          "Restore authentication. If device is registered, uses device-based auth. " +
+          "If user is logged in but device not registered, auto-registers for future sessions. " +
+          "Use when auth fails or session expires.",
         inputSchema: {
           type: "object",
           properties: {},
@@ -903,7 +904,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           };
         }
 
-        const { isPro, tier, canUseMcp } = await bridge.checkProAccess();
+        const { isPro, tier, canUseMcp, device_registered } = await bridge.checkProAccess();
 
         // Get full user info for analytics
         try {
@@ -931,6 +932,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                 isPro,
                 tier,
                 canUseMcp,
+                device_registered,
                 message: canUseMcp
                   ? isPro
                     ? "Connected with Pro access. Ready to use all Socials tools."
@@ -1744,6 +1746,17 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         const result = await bridge.refreshAuth();
         await trackToolUsage(name, null, result.success, getElapsed());
 
+        let message: string;
+        if (result.success) {
+          if (result.registered) {
+            message = "Authentication successful. Device auto-registered for future sessions.";
+          } else {
+            message = "Authentication successful";
+          }
+        } else {
+          message = result.action_required || result.error || "Failed to refresh authentication";
+        }
+
         return {
           content: [
             {
@@ -1751,9 +1764,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
               text: JSON.stringify({
                 success: result.success,
                 error: result.error,
-                message: result.success
-                  ? "Authentication refresh triggered"
-                  : result.error || "Failed to refresh authentication",
+                device_id: result.device_id,
+                device_registered: result.registered,
+                action_required: result.action_required,
+                message,
               }),
             },
           ],
