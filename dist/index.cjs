@@ -26003,7 +26003,7 @@ var ExtensionBridge = class {
     }
   }
   /**
-   * Open the Socials extension sidebar/side panel.
+   * Open the Socials extension UI in a popup window.
    */
   async openSidebar() {
     return this.sendRequest("open_sidebar", void 0);
@@ -26816,14 +26816,14 @@ var allTools = [
   },
   {
     name: "socials_sidebar",
-    description: "Control the Socials extension sidebar. action 'close' hides the sidebar. action 'open' returns instructions (Chrome blocks programmatic open - user must click extension icon).",
+    description: "Control the Socials extension UI. action 'open' opens the Socials UI in a popup window. action 'close' hides the sidebar panel.",
     inputSchema: {
       type: "object",
       properties: {
         action: {
           type: "string",
           enum: ["open", "close"],
-          description: "close hides sidebar; open returns user instructions"
+          description: "open launches UI in popup window; close hides sidebar"
         }
       },
       required: ["action"]

@@ -304,10 +304,10 @@ export class ExtensionBridge {
   }
 
   /**
-   * Open the Socials extension sidebar/side panel.
+   * Open the Socials extension UI in a popup window.
    */
-  async openSidebar(): Promise<{ success: boolean; error?: string }> {
-    return this.sendRequest<{ success: boolean; error?: string }>("open_sidebar", undefined);
+  async openSidebar(): Promise<{ success: boolean; error?: string; windowId?: number }> {
+    return this.sendRequest<{ success: boolean; error?: string; windowId?: number }>("open_sidebar", undefined);
   }
 
   /**
