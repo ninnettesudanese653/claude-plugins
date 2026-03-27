@@ -756,15 +756,14 @@ const allTools = [
         name: "socials_sidebar",
         description:
           "Control the Socials extension sidebar. " +
-          "Use action 'close' to hide the sidebar. " +
-          "Note: 'open' cannot work programmatically (Chrome security) - returns instructions for user to click the extension icon.",
+          "Use action 'open' to open the Socials UI in a popup window, 'close' to hide the sidebar.",
         inputSchema: {
           type: "object",
           properties: {
             action: {
               type: "string",
               enum: ["open", "close"],
-              description: "Whether to open or close the sidebar (open returns instructions due to Chrome limitation)",
+              description: "Whether to open or close the sidebar",
             },
           },
           required: ["action"],
