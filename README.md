@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://www.brainrotcreations.com/og/projects-socials/default.png" alt="Socials" width="100%" />
+  <img src="./assets/socials.gif" alt="Claude Code Plugin — Socials" width="100%" />
 </p>
 
 <h1 align="center">Socials</h1>
@@ -148,6 +148,7 @@ Add to your config (`~/Library/Application Support/Claude/claude_desktop_config.
 ```
 claude-plugins/
 ├── .claude-plugin/     # Plugin manifest, agents, skills, commands
+├── assets/             # README header (socials.gif)
 ├── src/                # TypeScript source
 ├── dist/               # Built output
 └── package.json
