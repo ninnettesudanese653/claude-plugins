@@ -25301,7 +25301,7 @@ function getAnonymousMachineId() {
   return (0, import_crypto2.createHash)("sha256").update(raw).digest("hex").slice(0, 16);
 }
 var anonymousMachineId = getAnonymousMachineId();
-var pluginVersion = "1.0.32";
+var pluginVersion = "1.0.33";
 var userId = null;
 var userEmail = null;
 var userTier = null;
@@ -26001,18 +26001,6 @@ var ExtensionBridge = class {
         error: error2 instanceof Error ? error2.message : "Unknown error"
       };
     }
-  }
-  /**
-   * Open the Socials extension UI in a popup window.
-   */
-  async openSidebar() {
-    return this.sendRequest("open_sidebar", void 0);
-  }
-  /**
-   * Close the Socials extension sidebar/side panel.
-   */
-  async closeSidebar() {
-    return this.sendRequest("close_sidebar", void 0);
   }
   /**
    * Trigger a token refresh / re-authentication in the extension.
@@ -26815,21 +26803,6 @@ var allTools = [
     }
   },
   {
-    name: "socials_sidebar",
-    description: "Control the Socials extension UI. action 'open' opens the Socials UI in a popup window. action 'close' hides the sidebar panel.",
-    inputSchema: {
-      type: "object",
-      properties: {
-        action: {
-          type: "string",
-          enum: ["open", "close"],
-          description: "open launches UI in popup window; close hides sidebar"
-        }
-      },
-      required: ["action"]
-    }
-  },
-  {
     name: "socials_refresh_auth",
     description: "Restore authentication. If device is registered, uses device-based auth. If user is logged in but device not registered, auto-registers for future sessions. Use when auth fails or session expires.",
     inputSchema: {
@@ -27561,7 +27534,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
               type: "text",
               text: JSON.stringify({
                 status: "ok",
-                version: "1.0.32",
+                version: "1.0.33",
                 extension_connected: extensionConnected,
                 health,
                 engagement,
@@ -27588,26 +27561,6 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                 last_ping_latency_ms: connectionHealth.lastPingLatencyMs,
                 is_healthy: connectionHealth.healthy,
                 message: connectionHealth.healthy ? "Connection is healthy" : connectionHealth.connected ? `Connection may be degraded: ${connectionHealth.consecutiveFailures} consecutive ping failures` : "Extension not connected"
-              })
-            }
-          ]
-        };
-      }
-      case "socials_sidebar": {
-        if (!bridge.isConnected()) {
-          throw new Error("Extension not connected");
-        }
-        const action = args.action;
-        const result = action === "open" ? await bridge.openSidebar() : await bridge.closeSidebar();
-        await trackToolUsage(name, null, result.success, getElapsed());
-        return {
-          content: [
-            {
-              type: "text",
-              text: JSON.stringify({
-                success: result.success,
-                error: result.error,
-                message: result.success ? `Sidebar ${action === "open" ? "opened" : "closed"}` : result.error || `Failed to ${action} sidebar`
               })
             }
           ]

@@ -304,20 +304,6 @@ export class ExtensionBridge {
   }
 
   /**
-   * Open the Socials extension UI in a popup window.
-   */
-  async openSidebar(): Promise<{ success: boolean; error?: string; windowId?: number }> {
-    return this.sendRequest<{ success: boolean; error?: string; windowId?: number }>("open_sidebar", undefined);
-  }
-
-  /**
-   * Close the Socials extension sidebar/side panel.
-   */
-  async closeSidebar(): Promise<{ success: boolean; error?: string }> {
-    return this.sendRequest<{ success: boolean; error?: string }>("close_sidebar", undefined);
-  }
-
-  /**
    * Trigger a token refresh / re-authentication in the extension.
    * Uses device-based auth if device is registered.
    * Auto-registers device if user has a session but device isn't registered yet.

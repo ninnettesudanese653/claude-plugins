@@ -753,24 +753,6 @@ const allTools = [
         },
       },
       {
-        name: "socials_sidebar",
-        description:
-          "Control the Socials extension UI. " +
-          "action 'open' opens the Socials UI in a popup window. " +
-          "action 'close' hides the sidebar panel.",
-        inputSchema: {
-          type: "object",
-          properties: {
-            action: {
-              type: "string",
-              enum: ["open", "close"],
-              description: "open launches UI in popup window; close hides sidebar",
-            },
-          },
-          required: ["action"],
-        },
-      },
-      {
         name: "socials_refresh_auth",
         description:
           "Restore authentication. If device is registered, uses device-based auth. " +
@@ -1672,7 +1654,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
               type: "text",
               text: JSON.stringify({
                 status: "ok",
-                version: "1.0.32",
+                version: "1.0.33",
                 extension_connected: extensionConnected,
                 health,
                 engagement,
@@ -1705,33 +1687,6 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                   : connectionHealth.connected
                     ? `Connection may be degraded: ${connectionHealth.consecutiveFailures} consecutive ping failures`
                     : "Extension not connected",
-              }),
-            },
-          ],
-        };
-      }
-
-      case "socials_sidebar": {
-        if (!bridge.isConnected()) {
-          throw new Error("Extension not connected");
-        }
-
-        const action = (args as { action: "open" | "close" }).action;
-        const result = action === "open"
-          ? await bridge.openSidebar()
-          : await bridge.closeSidebar();
-        await trackToolUsage(name, null, result.success, getElapsed());
-
-        return {
-          content: [
-            {
-              type: "text",
-              text: JSON.stringify({
-                success: result.success,
-                error: result.error,
-                message: result.success
-                  ? `Sidebar ${action === "open" ? "opened" : "closed"}`
-                  : result.error || `Failed to ${action} sidebar`,
               }),
             },
           ],
