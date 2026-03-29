@@ -184,8 +184,26 @@ export class ExtensionBridge {
 
   private handleMessage(data: string): void {
     try {
-      const response: ExtensionResponse = JSON.parse(data);
+      const message = JSON.parse(data);
 
+      // Check if this is a keepalive request from the extension (has type field)
+      if (message.type === "keepalive" && message.id) {
+        // Respond to keepalive to confirm we're alive
+        if (this.client?.readyState === WebSocket.OPEN) {
+          this.client.send(JSON.stringify({
+            id: message.id,
+            success: true,
+            data: { ack: true, serverTimestamp: Date.now() }
+          }));
+        }
+        // Reset ping failure counters since extension is clearly alive
+        this.consecutivePingFailures = 0;
+        this.lastSuccessfulPing = Date.now();
+        return;
+      }
+
+      // Otherwise treat as response to a pending request
+      const response: ExtensionResponse = message;
       const pending = this.pendingRequests.get(response.id);
       if (pending) {
         clearTimeout(pending.timeout);

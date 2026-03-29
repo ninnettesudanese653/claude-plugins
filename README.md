@@ -14,21 +14,31 @@
 
 1. Install the [Socials Chrome extension](https://chromewebstore.google.com/detail/socials-generate-posts-in/pmpemhbbmaicdmnlmenopaclpdfnllje)
 
+2. In the Terminal or Preferred IDE Terminal:
+
+```
+claude
+```
+
 2. In Claude Code:
-   ```
-   /plugin marketplace add Brainrot-Creations/claude-plugins
-   ```
-   ```
-   /plugin install socials@brainrot-creations
-   ```
-   ```
-   /reload-plugins
-   ```
+
+```
+/plugin marketplace add Brainrot-Creations/claude-plugins
+```
+
+```
+/plugin install socials@brainrot-creations
+```
+
+```
+/reload-plugins
+```
 
 Done. Talk to Claude naturally:
-- *"Connect with 100 LinkedIn recruiters hiring for React roles"*
-- *"Find Reddit threads about note-taking and mention my app naturally"*
-- *"Reply to 50 X posts about indie hacking and promote my SaaS"*
+
+- _"Connect with 100 LinkedIn recruiters hiring for React roles"_
+- _"Find Reddit threads about note-taking and mention my app naturally"_
+- _"Reply to 50 X posts about indie hacking and promote my SaaS"_
 
 ---
 

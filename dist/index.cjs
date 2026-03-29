@@ -25912,7 +25912,20 @@ var ExtensionBridge = class {
   }
   handleMessage(data) {
     try {
-      const response = JSON.parse(data);
+      const message = JSON.parse(data);
+      if (message.type === "keepalive" && message.id) {
+        if (this.client?.readyState === import_websocket.default.OPEN) {
+          this.client.send(JSON.stringify({
+            id: message.id,
+            success: true,
+            data: { ack: true, serverTimestamp: Date.now() }
+          }));
+        }
+        this.consecutivePingFailures = 0;
+        this.lastSuccessfulPing = Date.now();
+        return;
+      }
+      const response = message;
       const pending = this.pendingRequests.get(response.id);
       if (pending) {
         clearTimeout(pending.timeout);
