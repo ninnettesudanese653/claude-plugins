@@ -787,4 +787,57 @@ export class ExtensionBridge {
       this.wss = null;
     }
   }
+
+  /**
+   * Restart the WebSocket bridge. Useful when the connection is stuck or port is in use.
+   * Force-kills any process on BRIDGE_PORT before restarting.
+   */
+  async restart(): Promise<{ success: boolean; message: string }> {
+    console.error("[ExtensionBridge] Restarting bridge...");
+
+    // Stop existing server and connections
+    this.stop();
+
+    // Wait a moment for cleanup
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    // Force reclaim the port (kill any stale processes)
+    try {
+      const out = execFileSync("lsof", ["-t", "-i", `TCP:${BRIDGE_PORT}`], {
+        encoding: "utf8",
+        stdio: ["ignore", "pipe", "ignore"],
+      }).trim();
+      for (const pid of out.split("\n").filter(Boolean)) {
+        const pidNum = Number(pid);
+        // Don't kill ourselves
+        if (pidNum !== process.pid) {
+          try {
+            process.kill(pidNum, "SIGTERM");
+            console.error(`[ExtensionBridge] Killed stale process ${pidNum} on port ${BRIDGE_PORT}`);
+          } catch {
+            /* ignore */
+          }
+        }
+      }
+      // Wait for processes to die
+      await new Promise(resolve => setTimeout(resolve, 500));
+    } catch {
+      /* no listeners - good */
+    }
+
+    // Restart the server
+    try {
+      await this.start();
+      return {
+        success: true,
+        message: `Bridge restarted successfully. WebSocket server listening on ${BRIDGE_HOST}:${BRIDGE_PORT}. Please refresh the Socials extension in your browser to reconnect.`
+      };
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : "Unknown error";
+      return {
+        success: false,
+        message: `Failed to restart bridge: ${msg}`
+      };
+    }
+  }
 }

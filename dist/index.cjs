@@ -26234,6 +26234,46 @@ var ExtensionBridge = class {
       this.wss = null;
     }
   }
+  /**
+   * Restart the WebSocket bridge. Useful when the connection is stuck or port is in use.
+   * Force-kills any process on BRIDGE_PORT before restarting.
+   */
+  async restart() {
+    console.error("[ExtensionBridge] Restarting bridge...");
+    this.stop();
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    try {
+      const out = (0, import_child_process.execFileSync)("lsof", ["-t", "-i", `TCP:${BRIDGE_PORT}`], {
+        encoding: "utf8",
+        stdio: ["ignore", "pipe", "ignore"]
+      }).trim();
+      for (const pid of out.split("\n").filter(Boolean)) {
+        const pidNum = Number(pid);
+        if (pidNum !== process.pid) {
+          try {
+            process.kill(pidNum, "SIGTERM");
+            console.error(`[ExtensionBridge] Killed stale process ${pidNum} on port ${BRIDGE_PORT}`);
+          } catch {
+          }
+        }
+      }
+      await new Promise((resolve) => setTimeout(resolve, 500));
+    } catch {
+    }
+    try {
+      await this.start();
+      return {
+        success: true,
+        message: `Bridge restarted successfully. WebSocket server listening on ${BRIDGE_HOST}:${BRIDGE_PORT}. Please refresh the Socials extension in your browser to reconnect.`
+      };
+    } catch (error2) {
+      const msg = error2 instanceof Error ? error2.message : "Unknown error";
+      return {
+        success: false,
+        message: `Failed to restart bridge: ${msg}`
+      };
+    }
+  }
 };
 
 // src/index.ts
@@ -26332,7 +26372,7 @@ Upgrade at https://socials.brainrotcreations.com/pricing`
 var allTools = [
   {
     name: "socials_check_access",
-    description: "Check connection status. After confirming access, use socials_open_tab to open X/LinkedIn/Reddit.",
+    description: "Check connection status. After confirming access, use socials_open_tab to open X/LinkedIn/Reddit. RECOVERY FLOW if this fails: 1) socials_refresh_auth 2) if still fails, socials_restart_bridge 3) user refreshes browser extension 4) retry check_access.",
     inputSchema: {
       type: "object",
       properties: {},
@@ -26836,7 +26876,16 @@ var allTools = [
   },
   {
     name: "socials_refresh_auth",
-    description: "Restore authentication when connected but auth fails. Uses device-based auth if device was previously registered (works even when logged out). Auto-registers device for future sessions if user is logged in. IMPORTANT: Call this FIRST when any tool fails with auth errors before asking user to log in.",
+    description: "RECOVERY STEP 1: Restore authentication when connected but auth fails. Uses device-based auth if device was previously registered (works even when logged out). Auto-registers device for future sessions if user is logged in. If this fails, proceed to socials_restart_bridge (step 2).",
+    inputSchema: {
+      type: "object",
+      properties: {},
+      required: []
+    }
+  },
+  {
+    name: "socials_restart_bridge",
+    description: "RECOVERY STEP 2: Restart the WebSocket bridge when refresh_auth fails or connection is stuck. Use when socials_check_access shows ws_server_listening=false or connected=false. Kills stale processes on port 9847 and restarts WS server. AFTER THIS: User must refresh Socials extension in browser, then retry socials_check_access.",
     inputSchema: {
       type: "object",
       properties: {},
@@ -26913,7 +26962,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                   connected: false,
                   ws_server_listening: false,
                   extension_connected: false,
-                  action: "The MCP WebSocket bridge is not listening on port 9847 (bridge failed to start or port is in use). Fix: run `lsof -nP -iTCP:9847 | grep LISTEN`, quit duplicate Claude sessions or stale node processes, or add env SOCIALS_MCP_RECLAIM_PORT=1 to this MCP server in Claude. Then restart Claude Code so the Socials plugin starts cleanly."
+                  action: "WS bridge not listening. RECOVERY: 1) Call socials_restart_bridge to restart the bridge 2) Refresh Socials extension in browser 3) Retry socials_check_access"
                 })
               }
             ]
@@ -26928,7 +26977,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                   connected: false,
                   ws_server_listening: true,
                   extension_connected: false,
-                  action: "Extension not connected to MCP bridge. Ensure: 1) Socials extension is installed in Chrome/Edge/Brave, 2) Extension is enabled in chrome://extensions, 3) Try reloading the extension. Once connected, if auth fails use socials_refresh_auth to restore session."
+                  action: "Extension not connected. RECOVERY: 1) Ensure Socials extension is installed and enabled 2) Refresh/reload the extension in browser 3) If still fails: socials_restart_bridge \u2192 refresh extension \u2192 retry"
                 })
               }
             ]
@@ -27692,6 +27741,18 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           ]
         };
       }
+      case "socials_restart_bridge": {
+        const result = await bridge.restart();
+        await trackToolUsage(name, null, result.success, getElapsed());
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(result)
+            }
+          ]
+        };
+      }
       default:
         throw new Error(`Unknown tool: ${name}`);
     }
@@ -27702,9 +27763,9 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     let hint = "";
     const lowerError = errorMessage.toLowerCase();
     if (lowerError.includes("not logged in") || lowerError.includes("auth") || lowerError.includes("session")) {
-      hint = " Try calling socials_refresh_auth to restore the session.";
+      hint = " RECOVERY: 1) socials_refresh_auth 2) if fails, socials_restart_bridge + refresh browser extension 3) socials_check_access.";
     } else if (lowerError.includes("not connected") || lowerError.includes("extension")) {
-      hint = " Ensure the Socials extension is installed and enabled, then call socials_check_access.";
+      hint = " RECOVERY: 1) socials_refresh_auth 2) if fails, socials_restart_bridge + refresh browser extension 3) socials_check_access.";
     }
     return {
       content: [

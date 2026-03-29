@@ -36,7 +36,15 @@ Test: socials_check_access
 Expected: connected=true, canUseMcp=true
 ```
 
-If this fails, stop and report the issue - other tests won't work.
+**If this fails, run the RECOVERY FLOW before stopping:**
+```
+RECOVERY FLOW:
+1. socials_refresh_auth → try to restore auth
+2. If still fails: socials_restart_bridge → restart WS bridge
+3. Ask user to refresh Socials extension in browser
+4. Retry socials_check_access
+5. If still fails after recovery, stop and report the issue
+```
 
 ```
 Test: socials_health_check
@@ -89,6 +97,13 @@ Expected: Returns auth status (validates device auth flow)
 ```
 Test: socials_reload_tab
 Expected: success=true, agent tab reloaded
+```
+
+Optional (only if testing recovery):
+```
+Test: socials_restart_bridge
+Expected: success=true, message includes "listening on 127.0.0.1:9847"
+Note: After this, user must refresh browser extension before continuing
 ```
 
 ### 3. X (Twitter) Tests - Read Only
