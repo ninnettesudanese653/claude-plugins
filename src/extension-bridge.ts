@@ -548,6 +548,46 @@ export class ExtensionBridge {
     }>("x_profile", {});
   }
 
+  async getXNotifications(payload: { count?: number }): Promise<{
+    success: boolean;
+    notifications?: Array<{
+      type: "like" | "follow" | "repost" | "reply" | "mention" | "quote" | "unknown";
+      user: {
+        name: string;
+        handle: string;
+        avatarUrl?: string;
+        isVerified: boolean;
+      };
+      timestamp?: string;
+      relatedContent?: string;
+      tweetUrl?: string;
+      tweetId?: string;
+    }>;
+    scrolled?: boolean;
+    message?: string;
+    error?: string;
+  }> {
+    return this.sendRequest<{
+      success: boolean;
+      notifications?: Array<{
+        type: "like" | "follow" | "repost" | "reply" | "mention" | "quote" | "unknown";
+        user: {
+          name: string;
+          handle: string;
+          avatarUrl?: string;
+          isVerified: boolean;
+        };
+        timestamp?: string;
+        relatedContent?: string;
+        tweetUrl?: string;
+        tweetId?: string;
+      }>;
+      scrolled?: boolean;
+      message?: string;
+      error?: string;
+    }>("x_notifications", payload);
+  }
+
   async scrollPage(direction: string, amount: number): Promise<{ success: boolean }> {
     return this.sendRequest<{ success: boolean }>("scroll_page", { direction, amount });
   }

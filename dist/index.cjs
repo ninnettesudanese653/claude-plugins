@@ -26131,6 +26131,9 @@ var ExtensionBridge = class {
   async getXProfile() {
     return this.sendRequest("x_profile", {});
   }
+  async getXNotifications(payload) {
+    return this.sendRequest("x_notifications", payload);
+  }
   async scrollPage(direction, amount) {
     return this.sendRequest("scroll_page", { direction, amount });
   }
@@ -26642,6 +26645,20 @@ var allTools = [
     inputSchema: {
       type: "object",
       properties: {},
+      required: []
+    }
+  },
+  {
+    name: "socials_x_notifications",
+    description: "Get notifications from X (Twitter). Must navigate to https://x.com/notifications first. Returns likes, follows, reposts, mentions with user info and timestamps.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        count: {
+          type: "number",
+          description: "Number of notifications to retrieve (default 10, max 20)"
+        }
+      },
       required: []
     }
   },
@@ -27407,6 +27424,28 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
               text: JSON.stringify({
                 success: result.success,
                 profile: result.profile,
+                error: result.error
+              })
+            }
+          ]
+        };
+      }
+      case "socials_x_notifications": {
+        await requireProAccess();
+        const count = args.count || 10;
+        const result = await bridge.getXNotifications({ count });
+        const elapsed = getElapsed();
+        await trackToolUsage(name, "x", result.success, elapsed);
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify({
+                success: result.success,
+                notifications: result.notifications,
+                count: result.notifications?.length || 0,
+                scrolled: result.scrolled,
+                message: result.message,
                 error: result.error
               })
             }

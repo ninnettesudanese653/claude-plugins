@@ -517,6 +517,22 @@ const allTools = [
         },
       },
       {
+        name: "socials_x_notifications",
+        description:
+          "Get notifications from X (Twitter). Must navigate to https://x.com/notifications first. " +
+          "Returns likes, follows, reposts, mentions with user info and timestamps.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            count: {
+              type: "number",
+              description: "Number of notifications to retrieve (default 10, max 20)",
+            },
+          },
+          required: [],
+        },
+      },
+      {
         name: "socials_list_personas",
         description:
           "List available personas for content generation. Includes both system personas and user-created custom personas.",
@@ -1447,6 +1463,31 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
               text: JSON.stringify({
                 success: result.success,
                 profile: result.profile,
+                error: result.error,
+              }),
+            },
+          ],
+        };
+      }
+
+      case "socials_x_notifications": {
+        await requireProAccess();
+        const count = (args as { count?: number }).count || 10;
+        const result = await bridge.getXNotifications({ count });
+
+        const elapsed = getElapsed();
+        await trackToolUsage(name, "x", result.success, elapsed);
+
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify({
+                success: result.success,
+                notifications: result.notifications,
+                count: result.notifications?.length || 0,
+                scrolled: result.scrolled,
+                message: result.message,
                 error: result.error,
               }),
             },

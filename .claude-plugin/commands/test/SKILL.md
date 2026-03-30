@@ -182,6 +182,39 @@ Test: socials_get_post_context (tweet_id: <id from previous feed>)
 Expected: Returns context around the post (replies, parent thread)
 ```
 
+Navigate to notifications for notification tests:
+```
+Test: socials_navigate (url: "https://x.com/notifications")
+Expected: success=true
+```
+
+Wait 2 seconds, then:
+```
+Test: socials_x_notifications (count: 5)
+Expected: Returns array of notifications with:
+  - type: "like", "follow", "repost", "reply", "quote", "mention", or "unknown"
+  - user: { name, handle, avatarUrl, isVerified }
+  - timestamp: ISO datetime string
+  - relatedContent: truncated text of the liked/mentioned tweet (if applicable)
+  - tweetUrl: URL to the tweet (for tweets)
+  - tweetId: Tweet ID for use with socials_engage_post / socials_quick_reply
+Note: Must be on https://x.com/notifications page
+Note: If fewer notifications than requested, will auto-scroll up to 3 times
+```
+
+Test notification engagement workflow (if tweet notification found with tweetId):
+```
+Test: socials_engage_post (tweet_id: <tweetId from notification>, like: true, bookmark: true)
+Expected: success=true, likes and bookmarks the tweet directly from notifications page
+Note: No navigation needed - engage_post works on current page
+```
+
+```
+Test: socials_quick_reply (tweet_id: <tweetId from notification>, reply: "Thanks for the engagement! [timestamp]")
+Expected: success=true, replies to the notification tweet directly
+Note: Opens reply modal on the notification tweet and posts - no navigation needed
+```
+
 ### 4. X (Twitter) Tests - Destructive [FULL MODE ONLY]
 
 **Skip this section in Dry Run mode.**
@@ -530,6 +563,8 @@ Running in DRY RUN mode (safe, non-destructive)
   socials_x_search (near + place_country): PASS (location)
   socials_x_search (is_reply: false): PASS (exclusion)
   socials_get_post_context: PASS (context retrieved)
+  socials_navigate (notifications): PASS (x.com/notifications)
+  socials_x_notifications: PASS (5 notifications: 3 likes, 1 follow, 1 mention)
 
 [4/9] X (Twitter) Destructive Tests
   SKIPPED (Dry Run mode)
@@ -565,7 +600,7 @@ Running in DRY RUN mode (safe, non-destructive)
 === Socials Test Results ===
 Mode: Dry Run (non-destructive)
 
-All 31 read-only tests passed!
+All 33 read-only tests passed!
 6 destructive tests skipped.
 
 Your Socials setup is working correctly.
