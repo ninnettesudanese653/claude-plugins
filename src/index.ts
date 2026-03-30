@@ -671,7 +671,8 @@ const allTools = [
         name: "socials_linkedin_profile",
         description:
           "Get LinkedIn profile information. Navigates to the profile and extracts data in one call. " +
-          "Returns name, headline, about, experience, education, skills, connection status, and more.",
+          "Returns name, headline, about, experience, education, skills, connection status, and contact info " +
+          "(emails, phones, websites, birthday, twitter, etc. from the Contact Info dialog).",
         inputSchema: {
           type: "object",
           properties: {

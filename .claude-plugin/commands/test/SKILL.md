@@ -232,12 +232,22 @@ Expected: success=true
 Wait 2 seconds, then:
 ```
 Test: socials_linkedin_connection_status
-Expected: Returns connection status (connected, pending, not_connected, etc.)
+Expected: Returns connection status with one of:
+  - connected (detected via "More" menu button)
+  - pending_sent (detected via "Pending, click to withdraw" button)
+  - not_connected (detected via "Invite to connect" button)
+  - follow_only, unknown
+Also returns actions_available array
 ```
 
 ```
 Test: socials_linkedin_profile
-Expected: Returns profile details (name, headline, location, etc.)
+Expected: Returns profile details including:
+  - Basic: name, headline, location, profileUrl
+  - Connection: connectionDegree, followers, connections
+  - Content: about, currentRole, experiences, education, skills
+  - Contact Info: emails[], phones[], websites[], birthday, twitter, address
+Note: Tab will briefly focus to trigger LinkedIn's lazy-loaded content
 ```
 
 ### 6. LinkedIn Tests - Destructive [FULL MODE ONLY]
@@ -420,7 +430,7 @@ Running in DRY RUN mode (safe, non-destructive)
 [1/9] Connection Tests
   socials_check_access: PASS (connected, Pro tier)
   socials_health_check: PASS (healthy, 12ms latency)
-  socials_diagnostics: PASS (v1.0.34)
+  socials_diagnostics: PASS (v1.0.39)
 
 [2/9] Browser Control Tests
   socials_get_active_tab: PASS (tab 123, x.com)
