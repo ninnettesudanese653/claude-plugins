@@ -553,14 +553,18 @@ export class ExtensionBridge {
   }
 
   // LinkedIn People Search methods
-  async linkedinPeopleSearch(query: string): Promise<{
+  async linkedinPeopleSearch(filters: {
+    query?: string;
+    network?: string[];
+    actively_hiring?: boolean;
+  }): Promise<{
     success: boolean;
     url?: string;
     error?: string;
   }> {
     return this.sendRequest<{ success: boolean; url?: string; error?: string }>(
       "linkedin_people_search",
-      { query }
+      filters
     );
   }
 

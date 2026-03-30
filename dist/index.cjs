@@ -26135,10 +26135,10 @@ var ExtensionBridge = class {
     return this.sendRequest("scroll_page", { direction, amount });
   }
   // LinkedIn People Search methods
-  async linkedinPeopleSearch(query) {
+  async linkedinPeopleSearch(filters) {
     return this.sendRequest(
       "linkedin_people_search",
-      { query }
+      filters
     );
   }
   async linkedinGetPeople(count) {
@@ -26354,6 +26354,11 @@ var LinkedInPostsSearchSchema = external_exports.object({
   query: external_exports.string().min(1).describe(
     'LinkedIn content/posts search text (e.g. "founder energy", "startup tips"). Navigates to LinkedIn search results page filtered to Posts.'
   )
+});
+var LinkedInPeopleSearchSchema = external_exports.object({
+  query: external_exports.string().optional().describe('Search keywords (e.g., "software engineer", "product manager")'),
+  network: external_exports.array(external_exports.enum(["1st", "2nd", "3rd"])).optional().describe("Connection degree filter: 1st, 2nd, 3rd (can combine multiple)"),
+  actively_hiring: external_exports.boolean().optional().describe("Filter to people who are actively hiring")
 });
 var OpenTabSchema = external_exports.object({
   url: external_exports.string().describe("URL to open in new tab"),
@@ -26772,16 +26777,25 @@ var allTools = [
   // LinkedIn People Search tools
   {
     name: "socials_linkedin_people_search",
-    description: "Search for people on LinkedIn. Navigates to the search results page in the pinned agent tab. Returns list of people with their profiles. Use socials_linkedin_get_people to get the results after search.",
+    description: "Search for people on LinkedIn with filters. Filters: network (1st/2nd/3rd connections), actively_hiring. Use socials_linkedin_get_people to get results after search.",
     inputSchema: {
       type: "object",
       properties: {
         query: {
           type: "string",
-          description: "Search query (e.g., 'software engineer amazon', 'product manager google')"
+          description: "Search keywords (e.g., 'software engineer')"
+        },
+        network: {
+          type: "array",
+          items: { type: "string", enum: ["1st", "2nd", "3rd"] },
+          description: "Connection degree filter"
+        },
+        actively_hiring: {
+          type: "boolean",
+          description: "Filter to people who are actively hiring"
         }
       },
-      required: ["query"]
+      required: []
     }
   },
   {
@@ -27597,8 +27611,12 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       // LinkedIn People Search tools
       case "socials_linkedin_people_search": {
         await requireProAccess();
-        const query = args.query;
-        const result = await bridge.linkedinPeopleSearch(query);
+        const parsed = LinkedInPeopleSearchSchema.parse(args);
+        const result = await bridge.linkedinPeopleSearch({
+          query: parsed.query,
+          network: parsed.network,
+          actively_hiring: parsed.actively_hiring
+        });
         const elapsed = getElapsed();
         trackSearch("linkedin", "people", result.success, elapsed);
         await trackToolUsage(name, "linkedin", result.success, elapsed);
@@ -27610,7 +27628,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                 success: result.success,
                 url: result.url,
                 error: result.error,
-                message: result.success ? `Navigated to LinkedIn people search for "${query}". Use socials_linkedin_get_people to get results.` : result.error
+                message: result.success ? `Navigated to LinkedIn people search. Use socials_linkedin_get_people to get results.` : result.error
               })
             }
           ]

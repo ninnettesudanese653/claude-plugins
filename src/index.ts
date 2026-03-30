@@ -170,6 +170,17 @@ const LinkedInPostsSearchSchema = z.object({
     ),
 });
 
+const LinkedInPeopleSearchSchema = z.object({
+  query: z
+    .string()
+    .optional()
+    .describe('Search keywords (e.g., "software engineer", "product manager")'),
+  network: z.array(z.enum(["1st", "2nd", "3rd"])).optional()
+    .describe("Connection degree filter: 1st, 2nd, 3rd (can combine multiple)"),
+  actively_hiring: z.boolean().optional()
+    .describe("Filter to people who are actively hiring"),
+});
+
 // Browser control schemas
 const OpenTabSchema = z.object({
   url: z.string().describe("URL to open in new tab"),
@@ -651,17 +662,27 @@ const allTools = [
       {
         name: "socials_linkedin_people_search",
         description:
-          "Search for people on LinkedIn. Navigates to the search results page in the pinned agent tab. " +
-          "Returns list of people with their profiles. Use socials_linkedin_get_people to get the results after search.",
+          "Search for people on LinkedIn with filters. " +
+          "Filters: network (1st/2nd/3rd connections), actively_hiring. " +
+          "Use socials_linkedin_get_people to get results after search.",
         inputSchema: {
           type: "object",
           properties: {
             query: {
               type: "string",
-              description: "Search query (e.g., 'software engineer amazon', 'product manager google')",
+              description: "Search keywords (e.g., 'software engineer')",
+            },
+            network: {
+              type: "array",
+              items: { type: "string", enum: ["1st", "2nd", "3rd"] },
+              description: "Connection degree filter",
+            },
+            actively_hiring: {
+              type: "boolean",
+              description: "Filter to people who are actively hiring",
             },
           },
-          required: ["query"],
+          required: [],
         },
       },
       {
@@ -1666,8 +1687,13 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       // LinkedIn People Search tools
       case "socials_linkedin_people_search": {
         await requireProAccess();
-        const query = (args as { query: string }).query;
-        const result = await bridge.linkedinPeopleSearch(query);
+        const parsed = LinkedInPeopleSearchSchema.parse(args);
+
+        const result = await bridge.linkedinPeopleSearch({
+          query: parsed.query,
+          network: parsed.network,
+          actively_hiring: parsed.actively_hiring,
+        });
 
         // Track search with timing
         const elapsed = getElapsed();
@@ -1683,7 +1709,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                 url: result.url,
                 error: result.error,
                 message: result.success
-                  ? `Navigated to LinkedIn people search for "${query}". Use socials_linkedin_get_people to get results.`
+                  ? `Navigated to LinkedIn people search. Use socials_linkedin_get_people to get results.`
                   : result.error,
               }),
             },
