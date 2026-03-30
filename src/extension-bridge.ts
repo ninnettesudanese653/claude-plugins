@@ -510,6 +510,44 @@ export class ExtensionBridge {
     );
   }
 
+  async getXProfile(): Promise<{
+    success: boolean;
+    profile?: {
+      name: string;
+      handle: string;
+      bio: string;
+      location?: string;
+      website?: string;
+      joinDate?: string;
+      following?: number;
+      followers?: number;
+      isVerified: boolean;
+      profileImageUrl?: string;
+      bannerImageUrl?: string;
+      followStatus: "following" | "not_following" | "follows_you" | "mutual" | "unknown";
+    };
+    error?: string;
+  }> {
+    return this.sendRequest<{
+      success: boolean;
+      profile?: {
+        name: string;
+        handle: string;
+        bio: string;
+        location?: string;
+        website?: string;
+        joinDate?: string;
+        following?: number;
+        followers?: number;
+        isVerified: boolean;
+        profileImageUrl?: string;
+        bannerImageUrl?: string;
+        followStatus: "following" | "not_following" | "follows_you" | "mutual" | "unknown";
+      };
+      error?: string;
+    }>("x_profile", {});
+  }
+
   async scrollPage(direction: string, amount: number): Promise<{ success: boolean }> {
     return this.sendRequest<{ success: boolean }>("scroll_page", { direction, amount });
   }

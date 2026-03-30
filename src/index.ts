@@ -428,6 +428,17 @@ const allTools = [
         },
       },
       {
+        name: "socials_x_profile",
+        description:
+          "Extract profile information from an X (Twitter) profile page. Must navigate to a profile URL first (e.g., https://x.com/username). " +
+          "Returns name, handle, bio, location, website, join date, following/followers counts, verification status, and follow relationship.",
+        inputSchema: {
+          type: "object",
+          properties: {},
+          required: [],
+        },
+      },
+      {
         name: "socials_list_personas",
         description:
           "List available personas for content generation. Includes both system personas and user-created custom personas.",
@@ -1283,6 +1294,27 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
               text: JSON.stringify({
                 success: result.success,
                 url: result.url,
+                error: result.error,
+              }),
+            },
+          ],
+        };
+      }
+
+      case "socials_x_profile": {
+        await requireProAccess();
+        const result = await bridge.getXProfile();
+
+        const elapsed = getElapsed();
+        await trackToolUsage(name, "x", result.success, elapsed);
+
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify({
+                success: result.success,
+                profile: result.profile,
                 error: result.error,
               }),
             },
