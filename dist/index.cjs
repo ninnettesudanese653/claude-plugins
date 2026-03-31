@@ -27370,6 +27370,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                   id: p.id,
                   url: p.url,
                   author: p.author,
+                  verified: p.verified,
                   content: p.content,
                   timestamp: p.timestamp,
                   engagement: p.engagement
