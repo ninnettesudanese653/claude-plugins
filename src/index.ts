@@ -1234,8 +1234,13 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
       case "socials_quick_reply": {
         await requireProAccess();
-        const postId = (args as { post_id: string }).post_id;
-        const content = (args as { content: string }).content;
+        // Accept both post_id/content (schema) and tweet_id/reply (common agent mistake)
+        const a = args as Record<string, unknown>;
+        const postId = (a.post_id ?? a.tweet_id ?? a.postId) as string | undefined;
+        const content = (a.content ?? a.reply ?? a.text) as string | undefined;
+        if (!postId || !content) {
+          throw new Error(`Missing required parameters. Got: ${Object.keys(a).join(", ")}. Need: post_id, content`);
+        }
         const rawMedia = (args as { media?: Array<{ path: string; type: "image" | "video" | "gif" }> }).media;
 
         // Process media: convert local files to base64, keep URLs as-is (same as create_post)

@@ -27410,8 +27410,12 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       // }
       case "socials_quick_reply": {
         await requireProAccess();
-        const postId = args.post_id;
-        const content = args.content;
+        const a = args;
+        const postId = a.post_id ?? a.tweet_id ?? a.postId;
+        const content = a.content ?? a.reply ?? a.text;
+        if (!postId || !content) {
+          throw new Error(`Missing required parameters. Got: ${Object.keys(a).join(", ")}. Need: post_id, content`);
+        }
         const rawMedia = args.media;
         const processedMedia = rawMedia ? await Promise.all(
           rawMedia.map(async (item) => {
