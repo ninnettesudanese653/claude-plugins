@@ -40,6 +40,7 @@
     "SECURITY.md"
   ],
   "scripts": {
+    "version:bump": "bash scripts/bump-version.sh",
     "build": "esbuild src/index.ts --bundle --platform=node --target=node18 --format=cjs --outfile=dist/index.cjs && esbuild src/native-messaging-host.ts --bundle --platform=node --target=node18 --format=cjs --outfile=dist/native-messaging-host.cjs && esbuild src/install-native-host.ts --bundle --platform=node --target=node18 --format=cjs --outfile=dist/install-native-host.cjs",
     "postinstall": "node dist/install-native-host.cjs 2>/dev/null || true",
     "build:types": "tsc --emitDeclarationOnly",
