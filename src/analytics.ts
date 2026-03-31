@@ -291,11 +291,13 @@ export const PORT_CONFIG_FLAG = "mcp_port_config";
 export interface PortConfig {
   portStart: number;
   portCount: number;
+  coordinatorPort: number;
 }
 
 const DEFAULT_PORT_CONFIG: PortConfig = {
   portStart: 9847,
   portCount: 10,
+  coordinatorPort: 9846,
 };
 
 /**
@@ -328,6 +330,7 @@ export async function getPortConfig(): Promise<PortConfig> {
   return {
     portStart: typeof config.portStart === "number" ? config.portStart : DEFAULT_PORT_CONFIG.portStart,
     portCount: typeof config.portCount === "number" ? config.portCount : DEFAULT_PORT_CONFIG.portCount,
+    coordinatorPort: typeof config.coordinatorPort === "number" ? config.coordinatorPort : DEFAULT_PORT_CONFIG.coordinatorPort,
   };
 }
 
@@ -355,6 +358,7 @@ export function getPortConfigSync(): PortConfig {
   return {
     portStart: typeof config.portStart === "number" ? config.portStart : DEFAULT_PORT_CONFIG.portStart,
     portCount: typeof config.portCount === "number" ? config.portCount : DEFAULT_PORT_CONFIG.portCount,
+    coordinatorPort: typeof config.coordinatorPort === "number" ? config.coordinatorPort : DEFAULT_PORT_CONFIG.coordinatorPort,
   };
 }
 

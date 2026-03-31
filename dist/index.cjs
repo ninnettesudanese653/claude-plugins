@@ -25872,6 +25872,7 @@ async function findAvailablePort() {
   }
   throw new Error(`No available ports in range ${portConfig.portStart}-${portEnd}. Close some MCP instances.`);
 }
+var COORDINATOR_PORT = 9846;
 var ExtensionBridge = class {
   wss = null;
   /** True after the WebSocket server has bound to a port (extension can dial in). */
@@ -25884,13 +25885,75 @@ var ExtensionBridge = class {
   consecutivePingFailures = 0;
   lastSuccessfulPing = null;
   lastPingLatencyMs = null;
+  /** Whether we're connected via coordinator (native messaging) or standalone server */
+  mode = "standalone";
+  /** Unique ID for this MCP server (used by coordinator to route messages) */
+  mcpId = `mcp-${process.pid}-${Date.now()}`;
+  /**
+   * Start the bridge. Tries coordinator mode first (connects as client to native messaging
+   * host on port 9847), falls back to standalone WebSocket server mode.
+   */
   async start() {
-    console.error(`[ExtensionBridge] Finding available port in range ${portConfig.portStart}-${portConfig.portStart + portConfig.portCount - 1}...`);
-    const port = await findAvailablePort();
-    this.activePort = port;
-    console.error(`[ExtensionBridge] Found available port: ${port}. Starting WebSocket server...`);
+    try {
+      await this.startAsCoordinatorClient();
+      return;
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error(`[ExtensionBridge] Coordinator not available (${msg}), falling back to standalone server`);
+    }
+    await this.startAsStandaloneServer();
+  }
+  /**
+   * Connect as a WebSocket client to the native messaging coordinator.
+   * The coordinator relays messages to/from the Chrome extension via native messaging.
+   */
+  startAsCoordinatorClient() {
     return new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        reject(new Error("Coordinator connection timeout"));
+      }, 3e3);
+      const ws = new import_websocket.default(`ws://${BRIDGE_HOST}:${COORDINATOR_PORT}`);
+      ws.on("open", () => {
+        clearTimeout(timeout);
+        this.mode = "coordinator";
+        this.wsServerListening = true;
+        this.client = ws;
+        this.activePort = COORDINATOR_PORT;
+        ws.send(JSON.stringify({ type: "register", mcpId: this.mcpId }));
+        console.error(`[ExtensionBridge] \u2713 Connected to coordinator on port ${COORDINATOR_PORT} (mcpId: ${this.mcpId})`);
+        this.startPingInterval();
+        resolve();
+      });
+      ws.on("message", (data) => {
+        this.handleMessage(data.toString());
+      });
+      ws.on("close", () => {
+        console.error("[ExtensionBridge] Coordinator connection closed");
+        if (this.client === ws) {
+          this.client = null;
+          this.wsServerListening = false;
+          trackExtensionDisconnected();
+          clearUserIdentity();
+        }
+      });
+      ws.on("error", (error2) => {
+        clearTimeout(timeout);
+        reject(error2);
+      });
+    });
+  }
+  /**
+   * Start as a standalone WebSocket server (fallback when coordinator is not available).
+   * Extension connects directly by scanning ports.
+   */
+  startAsStandaloneServer() {
+    console.error(`[ExtensionBridge] Finding available port in range ${portConfig.portStart}-${portConfig.portStart + portConfig.portCount - 1}...`);
+    return new Promise(async (resolve, reject) => {
       try {
+        const port = await findAvailablePort();
+        this.activePort = port;
+        this.mode = "standalone";
+        console.error(`[ExtensionBridge] Found available port: ${port}. Starting WebSocket server...`);
         this.wsServerListening = false;
         this.wss = new import_websocket_server.default({
           port,
@@ -26286,6 +26349,14 @@ var ExtensionBridge = class {
    */
   async linkedinCreatePost(content) {
     return this.sendRequest("linkedin_create_post", { content });
+  }
+  /** Get the current bridge mode */
+  getMode() {
+    return this.mode;
+  }
+  /** Get the MCP ID (used in coordinator mode) */
+  getMcpId() {
+    return this.mcpId;
   }
   stop() {
     this.wsServerListening = false;

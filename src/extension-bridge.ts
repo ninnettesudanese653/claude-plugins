@@ -35,7 +35,12 @@ const MAX_PING_FAILURES = 3; // Disconnect after 3 consecutive ping failures
 const HEALTH_CHECK_TIMEOUT = 5000; // 5 seconds for health check ping
 
 // Runtime port config (populated from feature flags at startup)
-let portConfig: PortConfig = { portStart: DEFAULT_PORT_START, portCount: DEFAULT_PORT_COUNT };
+let portConfig: PortConfig = { portStart: DEFAULT_PORT_START, portCount: DEFAULT_PORT_COUNT, coordinatorPort: DEFAULT_COORDINATOR_PORT };
+
+/** Get the coordinator port from config */
+function getCoordinatorPort(): number {
+  return portConfig.coordinatorPort || DEFAULT_COORDINATOR_PORT;
+}
 
 /** Initialize port config from feature flags (with 5s timeout) */
 export async function initPortConfig(): Promise<PortConfig> {
@@ -95,6 +100,9 @@ async function findAvailablePort(): Promise<number> {
   throw new Error(`No available ports in range ${portConfig.portStart}-${portEnd}. Close some MCP instances.`);
 }
 
+// Default coordinator port — overridden by portConfig.coordinatorPort from feature flags
+const DEFAULT_COORDINATOR_PORT = 9846;
+
 export class ExtensionBridge {
   private wss: WebSocketServer | null = null;
   /** True after the WebSocket server has bound to a port (extension can dial in). */
@@ -114,16 +122,93 @@ export class ExtensionBridge {
   private consecutivePingFailures = 0;
   private lastSuccessfulPing: number | null = null;
   private lastPingLatencyMs: number | null = null;
+  /** Whether we're connected via coordinator (native messaging) or standalone server */
+  private mode: "coordinator" | "standalone" = "standalone";
+  /** Unique ID for this MCP server (used by coordinator to route messages) */
+  private mcpId: string = `mcp-${process.pid}-${Date.now()}`;
 
+  /**
+   * Start the bridge. Tries coordinator mode first (connects as client to native messaging
+   * host on port 9847), falls back to standalone WebSocket server mode.
+   */
   async start(): Promise<void> {
-    // Find available port first
-    console.error(`[ExtensionBridge] Finding available port in range ${portConfig.portStart}-${portConfig.portStart + portConfig.portCount - 1}...`);
-    const port = await findAvailablePort();
-    this.activePort = port;
-    console.error(`[ExtensionBridge] Found available port: ${port}. Starting WebSocket server...`);
+    // Try coordinator mode first (native messaging host)
+    try {
+      await this.startAsCoordinatorClient();
+      return;
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error(`[ExtensionBridge] Coordinator not available (${msg}), falling back to standalone server`);
+    }
 
+    // Fallback: standalone WebSocket server mode (extension scans ports)
+    await this.startAsStandaloneServer();
+  }
+
+  /**
+   * Connect as a WebSocket client to the native messaging coordinator.
+   * The coordinator relays messages to/from the Chrome extension via native messaging.
+   */
+  private startAsCoordinatorClient(): Promise<void> {
+    const coordPort = getCoordinatorPort();
     return new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        reject(new Error("Coordinator connection timeout"));
+      }, 3000);
+
+      const ws = new WebSocket(`ws://${BRIDGE_HOST}:${coordPort}`);
+
+      ws.on("open", () => {
+        clearTimeout(timeout);
+        this.mode = "coordinator";
+        this.wsServerListening = true; // Logically "listening" — extension can reach us via coordinator
+        this.client = ws;
+        this.activePort = coordPort;
+
+        // Register with coordinator
+        ws.send(JSON.stringify({ type: "register", mcpId: this.mcpId }));
+        console.error(`[ExtensionBridge] ✓ Connected to coordinator on port ${coordPort} (mcpId: ${this.mcpId})`);
+
+        // Start ping interval
+        this.startPingInterval();
+        resolve();
+      });
+
+      ws.on("message", (data: Buffer) => {
+        this.handleMessage(data.toString());
+      });
+
+      ws.on("close", () => {
+        console.error("[ExtensionBridge] Coordinator connection closed");
+        if (this.client === ws) {
+          this.client = null;
+          this.wsServerListening = false;
+          trackExtensionDisconnected();
+          clearUserIdentity();
+        }
+      });
+
+      ws.on("error", (error: Error) => {
+        clearTimeout(timeout);
+        reject(error);
+      });
+    });
+  }
+
+  /**
+   * Start as a standalone WebSocket server (fallback when coordinator is not available).
+   * Extension connects directly by scanning ports.
+   */
+  private startAsStandaloneServer(): Promise<void> {
+    console.error(`[ExtensionBridge] Finding available port in range ${portConfig.portStart}-${portConfig.portStart + portConfig.portCount - 1}...`);
+
+    return new Promise(async (resolve, reject) => {
       try {
+        const port = await findAvailablePort();
+        this.activePort = port;
+        this.mode = "standalone";
+        console.error(`[ExtensionBridge] Found available port: ${port}. Starting WebSocket server...`);
+
         this.wsServerListening = false;
         this.wss = new WebSocketServer({
           port: port,
@@ -909,6 +994,16 @@ export class ExtensionBridge {
    */
   async linkedinCreatePost(content: string): Promise<LinkedInActionResult> {
     return this.sendRequest<LinkedInActionResult>("linkedin_create_post", { content });
+  }
+
+  /** Get the current bridge mode */
+  getMode(): "coordinator" | "standalone" {
+    return this.mode;
+  }
+
+  /** Get the MCP ID (used in coordinator mode) */
+  getMcpId(): string {
+    return this.mcpId;
   }
 
   stop(): void {
