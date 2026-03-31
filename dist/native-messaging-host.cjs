@@ -3653,7 +3653,7 @@ var import_websocket = __toESM(require_websocket(), 1);
 var import_websocket_server = __toESM(require_websocket_server(), 1);
 
 // src/native-messaging-host.ts
-var COORDINATOR_PORT = 9846;
+var COORDINATOR_PORT = parseInt(process.env.SOCIALS_COORDINATOR_PORT || "9846", 10);
 var COORDINATOR_HOST = "127.0.0.1";
 function readNativeMessage() {
   return new Promise((resolve, reject) => {
