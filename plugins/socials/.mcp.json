@@ -1,8 +1,8 @@
 {
   "mcpServers": {
     "socials": {
-      "command": "npx",
-      "args": ["-y", "claude-plugins"],
+      "command": "node",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/dist/index.cjs"],
       "env": {
         "SOCIALS_MCP_RECLAIM_PORT": "1"
       }
