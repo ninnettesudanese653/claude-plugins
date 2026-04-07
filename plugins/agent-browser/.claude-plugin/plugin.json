@@ -1,0 +1,8 @@
+{
+  "name": "agent-browser",
+  "description": "Fast native browser automation for AI agents. Navigate, screenshot, fill forms, click, and extract data from any webpage.",
+  "author": {
+    "name": "Brainrot Creations",
+    "email": "support@brainrotcreations.com"
+  }
+}

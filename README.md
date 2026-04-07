@@ -24,6 +24,7 @@ Then install individual plugins:
 ```
 /plugin install socials@brainrot-creations
 /plugin install hive@brainrot-creations
+/plugin install agent-browser@brainrot-creations
 ```
 
 ```
@@ -50,16 +51,23 @@ Collective browser automation intelligence. Pull known interaction methods befor
 
 **Install:** `/plugin install hive@brainrot-creations`
 
+### [Agent Browser](./plugins/agent-browser)
+
+Fast native browser automation for AI agents. Navigate, screenshot, fill forms, click, and extract data from any webpage — powered by Chrome DevTools Protocol.
+
+**Install:** `/plugin install agent-browser@brainrot-creations`
+
 ---
 
 ## For Developers
 
 This repo is the plugin marketplace definition — it contains skill files, commands, and MCP config for each plugin. The underlying MCP servers live in their own packages:
 
-| Plugin | MCP Server |
-|--------|-----------|
+| Plugin | Source |
+|--------|--------|
 | socials | [@brainrotcreations/socials](https://github.com/Brainrot-Creations/socials) |
 | hive | [api.hive.brainrotcreations.com](https://hive.brainrotcreations.com) |
+| agent-browser | [Brainrot-Creations/agent-browser](https://github.com/Brainrot-Creations/agent-browser) |
 
 ---
 

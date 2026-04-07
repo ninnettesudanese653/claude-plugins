@@ -20,6 +20,13 @@
       "source": "./plugins/socials",
       "category": "external-integrations",
       "homepage": "https://socials.brainrotcreations.com"
+    },
+    {
+      "name": "agent-browser",
+      "description": "Fast native browser automation for AI agents. Navigate, screenshot, fill forms, click, and extract data from any webpage via Chrome DevTools Protocol.",
+      "source": "./plugins/agent-browser",
+      "category": "developer-tools",
+      "homepage": "https://github.com/Brainrot-Creations/agent-browser"
     }
   ]
 }
