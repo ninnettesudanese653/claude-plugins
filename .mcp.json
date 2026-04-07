@@ -2,7 +2,7 @@
   "mcpServers": {
     "socials": {
       "command": "npx",
-      "args": ["-y", "claude-plugins"],
+      "args": ["-y", "@brainrotcreations/socials"],
       "env": {
         "SOCIALS_MCP_RECLAIM_PORT": "1"
       }
