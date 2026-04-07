@@ -7,22 +7,5 @@
   },
   "homepage": "https://socials.brainrotcreations.com",
   "repository": "https://github.com/Brainrot-Creations/claude-plugins",
-  "license": "MIT",
-  "keywords": [
-    "mcp",
-    "socials",
-    "browser-extension",
-    "x",
-    "linkedin",
-    "reddit",
-    "claude-code-plugin"
-  ],
-  "commands": "./commands/",
-  "skills": "./skills/",
-  "agents": [
-    "./agents/manager.md",
-    "./agents/creator.md",
-    "./agents/engage.md",
-    "./agents/growth.md"
-  ]
+  "license": "MIT"
 }
