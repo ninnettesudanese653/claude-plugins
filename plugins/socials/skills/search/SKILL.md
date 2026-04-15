@@ -64,6 +64,7 @@ Search for posts, topics, and conversations across platforms.
    socials_get_feed({ platform: "[platform]" })
    ```
    For YouTube, call **`socials_get_page_content`** (optional **`limit`**, 1–80, default 40) to read **video cards** from the results page.
+   Call **`socials_fetch_image`** for thumbnail URLs only when visual inspection materially improves the answer (comparison/detail checks). If text/URLs are enough, keep image URLs as text to reduce token usage.
 
 6. **Offer next actions**
    - Get more details on a specific post

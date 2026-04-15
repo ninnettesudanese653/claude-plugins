@@ -24,7 +24,7 @@ Follow this flow unless the user explicitly asks for something else.
 
 ## 3. Read content
 
-- **`socials_fetch_image`** — pass a direct **image URL** (e.g. `thumbnailUrl` from YouTube cards, X `pbs.twimg.com`, Reddit preview URLs). Returns an **MCP image** for side-by-side visual inspection without opening tabs. Requires the same **Socials Pro + extension** connection as other MCP tools. Public CDN URLs work; cookie-only private URLs may fail (fetch runs in the MCP process).
+- **`socials_fetch_image`** — pass a direct **image URL** (e.g. `thumbnailUrl` from YouTube cards, X `pbs.twimg.com`, Reddit preview URLs). Returns an **MCP image** for side-by-side visual inspection without opening tabs. **Token policy:** image blocks are high-cost; use this only when it materially improves the outcome (visual comparison/detail checks). If text/URLs are enough, keep thumbnails as URLs and summarize from metadata. Requires the same **Socials Pro + extension** connection as other MCP tools. Public CDN URLs work; cookie-only private URLs may fail (fetch runs in the MCP process).
 - **`socials_get_feed`** — recent posts from a feed (requires **Socials Pro**; extension should be on the right feed page).
 - **`socials_get_post_context`** — thread/reply context for a **post URL** (Pro).
 - **`socials_get_page_content`** — on **YouTube search results** (`/results?search_query=…`), returns **video cards** (title, URL, **thumbnail URL**, channel, views, duration, snippet). The extension **auto-scrolls** the results list between scrapes (infinite scroll) until **`limit`** is reached or no new rows load. Optional **`limit`** (1–80, default 40). On X/LinkedIn/Reddit, feed snippets as before.
