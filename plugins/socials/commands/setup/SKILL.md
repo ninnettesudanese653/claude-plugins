@@ -25,9 +25,10 @@ Then offer quick start options:
 Say something like:
 "Let's get you set up with Socials! This will take about 2 minutes.
 
-Socials connects Claude to your social media accounts (X, LinkedIn, Reddit) through a browser extension. You'll be able to:
+Socials connects Claude to your social media accounts (X, LinkedIn, Reddit) through a browser extension, and can **open YouTube** in the browser for you (home, a video, or search results). You'll be able to:
 - Post and reply directly from here
 - Search and browse feeds
+- Open YouTube with **`socials_open_tab`** (e.g. `https://www.youtube.com/` or search: `https://www.youtube.com/results?search_query=...` with URL-encoded terms)
 - Engage with your audience
 - All without leaving Claude Code
 
@@ -77,7 +78,7 @@ Here's what you can do now:
 - `/search` - Search for content
 - `/feed` - Browse your timeline
 
-Or just tell me what you'd like to do - 'help me post about X' or 'find AI discussions on LinkedIn'
+Or just tell me what you'd like to do - 'help me post about X', 'find AI discussions on LinkedIn', or 'open YouTube and search for hello kitty'
 
 What would you like to try first?"
 

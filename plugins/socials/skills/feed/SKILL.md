@@ -15,7 +15,7 @@ Get the latest posts from your social media feed.
    ```
 
 2. **Determine platform**
-   Ask if not provided: X, LinkedIn, or Reddit?
+   Ask if not provided: X, LinkedIn, or Reddit? (YouTube is not supported by **`socials_get_feed`**—use **`socials_open_tab`** with `https://www.youtube.com/` or a channel/subscriptions URL, and **`socials_scroll`** if needed; see **`using-socials`**.)
 
 3. **Open the feed**
 
