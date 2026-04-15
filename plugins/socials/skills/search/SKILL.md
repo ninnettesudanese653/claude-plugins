@@ -63,7 +63,7 @@ Search for posts, topics, and conversations across platforms.
    ```
    socials_get_feed({ platform: "[platform]" })
    ```
-   For YouTube, the user views results in the browser tab; **`socials_get_page_content`** may return limited structured data without a YouTube adapter.
+   For YouTube, call **`socials_get_page_content`** (optional **`limit`**, 1–80, default 40) to read **video cards** from the results page.
 
 6. **Offer next actions**
    - Get more details on a specific post

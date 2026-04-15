@@ -1,10 +1,11 @@
 {
   "mcpServers": {
     "socials": {
-      "command": "npx",
-      "args": ["-y", "@brainrotcreations/socials"],
+      "command": "bash",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/scripts/run-claude-mcp.sh"],
       "env": {
-        "SOCIALS_MCP_RECLAIM_PORT": "1"
+        "SOCIALS_MCP_RECLAIM_PORT": "1",
+        "SOCIALS_MCP_DEV_MODE": "1"
       }
     }
   }
