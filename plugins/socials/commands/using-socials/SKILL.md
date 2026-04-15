@@ -20,14 +20,17 @@ Follow this flow unless the user explicitly asks for something else.
 - **If platform is X:** use **`socials_x_search`** first, then **`socials_get_feed`** / **`socials_quick_reply`** / (optionally) **`socials_engage_post`** on results.
 - **If platform is LinkedIn:** use **`socials_open_tab`** with `https://www.linkedin.com/feed/` and then **`socials_get_feed`** / **`socials_quick_reply`** (optionally **`socials_scroll`**) to work with posts and replies. Use **`socials_linkedin_posts_search`** to search for posts, then **`socials_get_feed`** to read results. Use **`socials_linkedin_engage_post`** to like or repost.
 - **If platform is Reddit:** use **`socials_open_tab`** with the subreddit URL and then **`socials_get_feed`** / **`socials_quick_reply`** (optionally **`socials_scroll`**) to work with posts.
-- **If the user wants YouTube:** use **`socials_open_tab`** with `https://www.youtube.com/` (home), a watch URL, or **search results** `https://www.youtube.com/results?search_query=...` where the query value is **URL-encoded** (same idea as `encodeURIComponent`). Refine search with **`socials_navigate`** on the agent tab. Feed/reply tools (**`socials_get_feed`**, **`socials_quick_reply`**, etc.) are for X/LinkedIn/Reddit only—not for parsing YouTube result lists unless a future adapter exists.
+- **If the user wants YouTube:** use **`socials_open_tab`** with `https://www.youtube.com/` (home), a watch URL, or **search results** `https://www.youtube.com/results?search_query=...` where the query value is **URL-encoded** (same idea as `encodeURIComponent`). Refine search with **`socials_navigate`** on the agent tab. To apply filters (Type/Duration/Upload date/Features/Prioritize), use the standard tool **`socials_apply_search_filters`** with `platform: "youtube"` and filter labels. Feed/reply tools (**`socials_get_feed`**, **`socials_quick_reply`**, etc.) are for X/LinkedIn/Reddit only—not for parsing YouTube result lists unless a future adapter exists.
 
 ## 3. Read content
 
 - **`socials_fetch_image`** — pass a direct **image URL** (e.g. `thumbnailUrl` from YouTube cards, X `pbs.twimg.com`, Reddit preview URLs). Returns an **MCP image** for side-by-side visual inspection without opening tabs. **Token policy:** image blocks are high-cost; use this only when it materially improves the outcome (visual comparison/detail checks). If text/URLs are enough, keep thumbnails as URLs and summarize from metadata. Requires the same **Socials Pro + extension** connection as other MCP tools. Public CDN URLs work; cookie-only private URLs may fail (fetch runs in the MCP process).
 - **`socials_get_feed`** — recent posts from a feed (requires **Socials Pro**; extension should be on the right feed page).
 - **`socials_get_post_context`** — thread/reply context for a **post URL** (Pro).
-- **`socials_get_page_content`** — on **YouTube search results** (`/results?search_query=…`), returns **video cards** (title, URL, **thumbnail URL**, channel, views, duration, snippet). The extension **auto-scrolls** the results list between scrapes (infinite scroll) until **`limit`** is reached or no new rows load. Optional **`limit`** (1–80, default 40). On X/LinkedIn/Reddit, feed snippets as before.
+- **`socials_get_page_content`** —
+  - On **YouTube search results** (`/results?search_query=…`): returns **video cards** (title, URL, **thumbnail URL**, channel, views, duration, snippet) with auto-scroll until **`limit`** is reached or no new rows load.
+  - On **YouTube watch pages** (`/watch?v=…`): returns structured `page_data` with title/channel/views/likes/description/comments count and extracted comments. Use `comment_sort: "top" | "newest"` to switch ordering before scrape, `comments_limit` (1–120, default 20), and `expand_description` (default true).
+  - On X/LinkedIn/Reddit: feed snippets as before.
 
 ## 4. Drafting and posting
 
