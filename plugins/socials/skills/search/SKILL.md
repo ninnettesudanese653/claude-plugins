@@ -1,5 +1,5 @@
 ---
-description: Search for posts and content on X, LinkedIn, or Reddit
+description: Search for posts and content on X, LinkedIn, or Reddit; open YouTube search results via browser URL
 user-invocable: true
 ---
 
@@ -15,7 +15,7 @@ Search for posts, topics, and conversations across platforms.
    ```
 
 2. **Get search parameters**
-   - Platform: X, LinkedIn, or Reddit?
+   - Platform: X, LinkedIn, Reddit, or YouTube?
    - Keywords or search query
    - Type: Latest, Top, or People (X only)
 
@@ -49,10 +49,21 @@ Search for posts, topics, and conversations across platforms.
    socials_get_feed({ platform: "reddit" })
    ```
 
+   **On YouTube (search in the browser):**
+   There is no separate MCP search tool. Build a results URL and open it (URL-encode the query, same idea as `encodeURIComponent`):
+   ```
+   socials_open_tab({
+     url: "https://www.youtube.com/results?search_query=hello+kitty"
+   })
+   ```
+   Use **`socials_navigate`** on the agent tab to change the search. Structured feed extraction is not available for YouTube the way it is for X/LinkedIn/Reddit.
+
 5. **Show results**
+   For X, LinkedIn, or Reddit:
    ```
    socials_get_feed({ platform: "[platform]" })
    ```
+   For YouTube, the user views results in the browser tab; **`socials_get_page_content`** may return limited structured data without a YouTube adapter.
 
 6. **Offer next actions**
    - Get more details on a specific post
