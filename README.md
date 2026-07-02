@@ -113,6 +113,8 @@ Look for clear names, short descriptions, and tags such as browser automation, H
 
 These plugins help with tasks tied to social platforms and content workflows.
 
+- [Hermes Tweet](https://github.com/Xquik-dev/hermes-tweet): Hermes Agent plugin for X/Twitter exploration, timeline reading, and action-gated posting workflows. It keeps read tools behind `XQUIK_API_KEY` and write actions behind `HERMES_TWEET_ENABLE_ACTIONS`.
+
 ### Hive tools
 
 These plugins fit workflows built around Hive-related tasks and services.
